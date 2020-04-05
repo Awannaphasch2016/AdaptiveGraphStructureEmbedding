@@ -303,6 +303,31 @@
             </PaintGroupHighlightMap>
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/.gitignore">
+          <value>
+            <PaintGroupHighlightMap>
+              <option name="paintGroups">
+                <map>
+                  <entry key="0">
+                    <value>
+                      <EditorHighlightsForPaintGroup />
+                    </value>
+                  </entry>
+                  <entry key="1">
+                    <value>
+                      <EditorHighlightsForPaintGroup />
+                    </value>
+                  </entry>
+                  <entry key="2">
+                    <value>
+                      <EditorHighlightsForPaintGroup />
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </PaintGroupHighlightMap>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/Data/Preprocessed/Cora/cora_added_edges_same_class_nodes.adjlist">
           <value>
             <PaintGroupHighlightMap>

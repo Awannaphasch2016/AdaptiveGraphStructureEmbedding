@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fdbf46f6-a7d8-4165-bd78-8c6d3dc015c2" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenNE/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/OpenNE/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/deepwalk/deepwalk/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/deepwalk/deepwalk/__main__.py" afterDir="false" />
     </list>
@@ -36,7 +37,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/deepwalk" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="SYNC" />
   </component>
   <component name="JsbtTreeLayoutManager">
@@ -272,7 +273,7 @@
       <workItem from="1585763787898" duration="5119000" />
       <workItem from="1585773945892" duration="280000" />
       <workItem from="1585775092061" duration="14775000" />
-      <workItem from="1585949580946" duration="31233000" />
+      <workItem from="1585949580946" duration="31866000" />
     </task>
     <servers />
   </component>

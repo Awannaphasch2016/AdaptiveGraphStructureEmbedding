@@ -1,5 +1,0 @@
-evalne
-evaluation
-methods
-tests
-utils
