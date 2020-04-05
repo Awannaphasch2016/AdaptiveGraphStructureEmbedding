@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="fdbf46f6-a7d8-4165-bd78-8c6d3dc015c2" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/OpenNE/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/OpenNE/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deepwalk/deepwalk/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/deepwalk/deepwalk/__main__.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="AdaptiveGraphStructureEmbedding" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Jupyter Notebook" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/deepwalk" />
+    <option name="ROOT_SYNC" value="SYNC" />
+  </component>
+  <component name="JsbtTreeLayoutManager">
+    <layout place="tools.popupGrunt">
+      <scroll-view-position x="0" y="0" />
+    </layout>
+  </component>
+  <component name="JupyterTrust" id="7cb7c8e8-a79d-467b-a1af-6c55c895e0af">
+    <option name="files">
+      <option value="Notebook\Libraries\torch_geometric.ipynb" />
+      <option value="test_evalne.ipynb" />
+    </option>
+  </component>
+  <component name="ProjectId" id="1ZdK6JhwKvVPXAcQRNJhqlm3vfA" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../DropEdge" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Models" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\AddSameClassEdges" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Libraries" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Output\TSNE" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\evalne\tests\data" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\EvalNE1\tests\data" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.fnn_test">
+    <configuration name="FNN" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AdaptiveGraphStructureEmbedding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Modeling" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/Modeling/FNN.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="FNN_with_gassian_noise_as_input" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AdaptiveGraphStructureEmbedding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/FNN_with_gassian_noise_as_input.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="AdaptiveGraphStructureEmbedding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="advance_mini_batching_with_torch_geometric" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AdaptiveGraphStructureEmbedding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/advance_mini_batching_with_torch_geometric.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fnn_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AdaptiveGraphStructureEmbedding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs/fnn_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="gan_with_pytorch" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AdaptiveGraphStructureEmbedding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Examples/Models" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Examples/Models/gan_with_pytorch.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytorch_geometric" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="AdaptiveGraphStructureEmbedding" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Notebook/Libraries" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+        </ENTRIES>
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Libraries\pytorch_geometric.py" />
+      <option name="PARAMETERS" value="--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora.embeddings" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.fnn_test" />
+        <item itemvalue="Python.FNN_with_gassian_noise_as_input" />
+        <item itemvalue="Python.advance_mini_batching_with_torch_geometric" />
+        <item itemvalue="Python.FNN" />
+        <item itemvalue="Python.gan_with_pytorch" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+    <option name="showServicesTree" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fdbf46f6-a7d8-4165-bd78-8c6d3dc015c2" name="Default Changelist" comment="" />
+      <created>1585163354308</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1585163354308</updated>
+      <workItem from="1585163373882" duration="5684000" />
+      <workItem from="1585170954341" duration="25091000" />
+      <workItem from="1585245107749" duration="41183000" />
+      <workItem from="1585422713229" duration="10223000" />
+      <workItem from="1585435775710" duration="29415000" />
+      <workItem from="1585518103229" duration="29879000" />
+      <workItem from="1585763787898" duration="5119000" />
+      <workItem from="1585773945892" duration="280000" />
+      <workItem from="1585775092061" duration="14775000" />
+      <workItem from="1585949580946" duration="31233000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="650" y="91" key="#__main__" timestamp="1585525950423">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="496" y="100" key="#__main__/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585471080887" />
+    <state x="650" y="91" key="#__main__/0.0.1536.824@0.0.1536.824" timestamp="1585525950423" />
+    <state x="223" y="68" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1585343041348">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="223" y="68" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585343041348" />
+    <state x="497" y="226" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1585950228150">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="497" y="216" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585456853457" />
+    <state x="497" y="216" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824@0.0.1536.824" timestamp="1585187289957" />
+    <state x="497" y="226" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.864@0.0.1536.864" timestamp="1585950228150" />
+    <state x="549" y="118" key="#com.intellij.ide.macro.MacrosDialog" timestamp="1585442767616">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="549" y="118" key="#com.intellij.ide.macro.MacrosDialog/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585442767616" />
+    <state x="549" y="118" key="#com.intellij.ide.macro.MacrosDialog/0.0.1536.824@0.0.1536.824" timestamp="1585285685210" />
+    <state x="496" y="120" key="#gan_with_pytorch" timestamp="1585961870335">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="496" y="120" key="#gan_with_pytorch/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1585961870335" />
+    <state x="496" y="120" key="#make_cora" timestamp="1585772139879">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="496" y="120" key="#make_cora/0.0.1536.864@0.0.1536.864" timestamp="1585772139879" />
+    <state x="496" y="100" key="#pytorch_geometric" timestamp="1585441859401">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="496" y="100" key="#pytorch_geometric/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585441859401" />
+    <state x="496" y="100" key="#pytorch_geometric_(1)" timestamp="1585525781367">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="496" y="100" key="#pytorch_geometric_(1)/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585471058095" />
+    <state x="496" y="100" key="#pytorch_geometric_(1)/0.0.1536.824@0.0.1536.824" timestamp="1585525781367" />
+    <state x="897" y="98" width="570" height="416" key="#xdebugger.evaluate" timestamp="1586070735458">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="762" y="125" width="488" height="699" key="#xdebugger.evaluate/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585469963244" />
+    <state x="839" y="159" width="570" height="567" key="#xdebugger.evaluate/0.0.1536.824@0.0.1536.824" timestamp="1585715383373" />
+    <state x="897" y="98" width="570" height="416" key="#xdebugger.evaluate/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070735458" />
+    <state x="839" y="131" width="670" height="733" key="#xdebugger.evaluate/0.0.1536.864@0.0.1536.864" timestamp="1585779880955" />
+    <state x="416" y="131" key="Cacher.FindSnippetDialog" timestamp="1586067464181">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="498" y="111" key="Cacher.FindSnippetDialog/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585470449794" />
+    <state x="498" y="111" key="Cacher.FindSnippetDialog/0.0.1536.824@0.0.1536.824" timestamp="1585714479662" />
+    <state x="416" y="131" key="Cacher.FindSnippetDialog/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586067464181" />
+    <state x="498" y="116" key="Cacher.FindSnippetDialog/0.0.1536.864@0.0.1536.864" timestamp="1585781124059" />
+    <state x="453" y="50" key="Cacher.NewSnippetDialog" timestamp="1586041154002">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="622" y="61" key="Cacher.NewSnippetDialog/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585352764805" />
+    <state x="622" y="61" key="Cacher.NewSnippetDialog/0.0.1536.824@0.0.1536.824" timestamp="1585713904341" />
+    <state x="453" y="50" key="Cacher.NewSnippetDialog/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586041154002" />
+    <state x="622" y="64" key="Cacher.NewSnippetDialog/0.0.1536.864@0.0.1536.864" timestamp="1585763234042" />
+    <state x="580" y="172" width="438" height="478" key="FileChooserDialogImpl" timestamp="1585950256590">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="707" y="66" key="FileChooserDialogImpl/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585471554248" />
+    <state x="580" y="164" width="438" height="478" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1585619999584" />
+    <state x="580" y="172" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1585950256590" />
+    <state width="1537" height="288" key="GridCell.Tab.0.bottom" timestamp="1586070644202">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
+    <state width="1537" height="274" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
+    <state width="1537" height="288" key="GridCell.Tab.0.bottom/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="244" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
+    <state width="1537" height="288" key="GridCell.Tab.0.center" timestamp="1586070644202">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.0.center/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
+    <state width="1537" height="274" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1585745647398" />
+    <state width="1537" height="288" key="GridCell.Tab.0.center/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="244" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
+    <state width="1537" height="288" key="GridCell.Tab.0.left" timestamp="1586070644202">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.0.left/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
+    <state width="1537" height="274" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1585745647398" />
+    <state width="1537" height="288" key="GridCell.Tab.0.left/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="244" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
+    <state width="1537" height="288" key="GridCell.Tab.0.right" timestamp="1586070644202">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.0.right/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
+    <state width="1537" height="274" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1585745647398" />
+    <state width="1537" height="288" key="GridCell.Tab.0.right/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="244" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
+    <state width="1537" height="288" key="GridCell.Tab.1.bottom" timestamp="1586070661610">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.1.bottom/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
+    <state width="1537" height="274" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
+    <state width="1537" height="288" key="GridCell.Tab.1.bottom/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.bottom/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
+    <state width="1537" height="288" key="GridCell.Tab.1.center" timestamp="1586070661610">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.1.center/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
+    <state width="1537" height="274" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
+    <state width="1537" height="288" key="GridCell.Tab.1.center/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.center/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
+    <state width="1537" height="288" key="GridCell.Tab.1.left" timestamp="1586070661610">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.1.left/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
+    <state width="1537" height="274" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
+    <state width="1537" height="288" key="GridCell.Tab.1.left/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.left/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
+    <state width="1537" height="288" key="GridCell.Tab.1.right" timestamp="1586070661610">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="1537" height="330" key="GridCell.Tab.1.right/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
+    <state width="1537" height="274" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
+    <state width="1537" height="288" key="GridCell.Tab.1.right/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.right/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
+    <state x="332" y="122" width="981" height="707" key="SettingsEditor" timestamp="1586042559865">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="332" y="117" width="981" height="707" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1585746702134" />
+    <state x="332" y="122" key="SettingsEditor/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586042559865" />
+    <state width="498" height="468" key="SwitcherDM" timestamp="1586071727773">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="498" height="446" key="SwitcherDM/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585471565138" />
+    <state width="498" height="446" key="SwitcherDM/0.0.1536.824@0.0.1536.824" timestamp="1585746783913" />
+    <state width="498" height="468" key="SwitcherDM/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586071727773" />
+    <state width="498" height="468" key="SwitcherDM/0.0.1536.864@0.0.1536.864" timestamp="1585949835326" />
+    <state x="361" y="146" key="Vcs.Push.Dialog.v2" timestamp="1585243400455">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="361" y="146" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1585243400455" />
+    <state width="776" height="462" key="XDebugger.FullValuePopup" timestamp="1585780628317">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="776" height="440" key="XDebugger.FullValuePopup/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585470886431" />
+    <state width="776" height="440" key="XDebugger.FullValuePopup/0.0.1536.824@0.0.1536.824" timestamp="1585285996389" />
+    <state width="776" height="462" key="XDebugger.FullValuePopup/0.0.1536.864@0.0.1536.864" timestamp="1585780628317" />
+    <state x="480" y="28" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1585436907991">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="480" y="28" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585436907991" />
+    <state x="330" y="156" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1585763056555">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="330" y="149" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585341315550" />
+    <state x="330" y="149" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1536.824@0.0.1536.824" timestamp="1585286114154" />
+    <state x="330" y="156" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1536.864@0.0.1536.864" timestamp="1585763056555" />
+    <state x="399" y="114" width="738" height="636" key="find.popup" timestamp="1585755798867">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="399" y="109" width="738" height="606" key="find.popup/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585422867694" />
+    <state x="399" y="114" width="738" height="636" key="find.popup/0.0.1536.864@0.0.1536.864" timestamp="1585755798867" />
+    <state width="600" height="445" key="javadoc.popup" timestamp="1586071580179">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state width="600" height="424" key="javadoc.popup/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585458819636" />
+    <state width="600" height="424" key="javadoc.popup/0.0.1536.824@0.0.1536.824" timestamp="1585714629430" />
+    <state width="600" height="445" key="javadoc.popup/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586071580179" />
+    <state width="600" height="445" key="javadoc.popup/0.0.1536.864@0.0.1536.864" timestamp="1585782139935" />
+    <state x="635" y="279" width="250" height="278" key="jetbrains.javascript.buildTools.run-task-popup" timestamp="1585190563465">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="635" y="279" width="250" height="278" key="jetbrains.javascript.buildTools.run-task-popup/0.0.1536.824@0.0.1536.824" timestamp="1585190563465" />
+    <state x="431" y="152" width="672" height="711" key="search.everywhere.popup" timestamp="1586065914922">
+      <screen x="0" y="0" width="1536" height="864" />
+    </state>
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585462223105" />
+    <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1585746666667" />
+    <state x="431" y="152" width="672" height="711" key="search.everywhere.popup/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586065914922" />
+    <state x="431" y="152" width="672" height="711" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1585780699542" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Visualization/visualization.py</url>
+          <line>25</line>
+          <option name="timeStamp" value="86" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Visualization/visualization.py</url>
+          <line>64</line>
+          <option name="timeStamp" value="103" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Visualization/visualization.py</url>
+          <line>23</line>
+          <option name="timeStamp" value="105" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Visualization/visualization.py</url>
+          <line>132</line>
+          <option name="timeStamp" value="113" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/deepwalk/deepwalk/__main__.py</url>
+          <line>43</line>
+          <option name="timeStamp" value="115" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/Anaconda3/envs/py36/Lib/site-packages/deepwalk-1.0.3-py3.6.egg/deepwalk/graph.py</url>
+          <line>69</line>
+          <option name="timeStamp" value="119" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/Anaconda3/envs/py36/Lib/site-packages/deepwalk-1.0.3-py3.6.egg/deepwalk/graph.py</url>
+          <line>66</line>
+          <option name="timeStamp" value="120" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/Anaconda3/envs/py36/Lib/site-packages/deepwalk-1.0.3-py3.6.egg/deepwalk/graph.py</url>
+          <line>59</line>
+          <option name="timeStamp" value="121" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Visualization/visualization.py</url>
+          <line>29</line>
+          <option name="timeStamp" value="165" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Preparation/Data/make_cora.py</url>
+          <line>271</line>
+          <option name="timeStamp" value="190" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/InMemoryDataset_class.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="192" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/deepwalk_graph_class.py</url>
+          <line>36</line>
+          <option name="timeStamp" value="195" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/Anaconda3/envs/py36/Lib/site-packages/deepwalk-1.0.3-py3.6.egg/deepwalk/graph.py</url>
+          <line>20</line>
+          <option name="timeStamp" value="198" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/Anaconda3/envs/py36/Lib/site-packages/deepwalk-1.0.3-py3.6.egg/deepwalk/graph.py</url>
+          <line>23</line>
+          <option name="timeStamp" value="199" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Preparation/Data/make_cora.py</url>
+          <line>258</line>
+          <option name="timeStamp" value="217" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Preparation/Data/make_cora.py</url>
+          <line>42</line>
+          <option name="timeStamp" value="218" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Preparation/Data/make_cora.py</url>
+          <line>191</line>
+          <option name="timeStamp" value="222" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Preparation/Data/make_cora.py</url>
+          <line>131</line>
+          <option name="timeStamp" value="230" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/gcn.py</url>
+          <line>180</line>
+          <option name="timeStamp" value="233" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/gan_with_pytorch.py</url>
+          <line>27</line>
+          <option name="timeStamp" value="234" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/gan_with_pytorch.py</url>
+          <line>84</line>
+          <option name="timeStamp" value="235" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/gan_with_pytorch.py</url>
+          <line>97</line>
+          <option name="timeStamp" value="236" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/gan_with_pytorch.py</url>
+          <line>126</line>
+          <option name="timeStamp" value="237" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/gan_with_pytorch.py</url>
+          <line>136</line>
+          <option name="timeStamp" value="238" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Models/gan_with_pytorch.py</url>
+          <line>72</line>
+          <option name="timeStamp" value="240" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/Modeling/FNN.py</url>
+          <line>49</line>
+          <option name="timeStamp" value="247" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/advance_mini_batching_with_torch_geometric.py</url>
+          <option name="timeStamp" value="255" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/FNN_with_gassian_noise_as_input.py</url>
+          <line>179</line>
+          <option name="timeStamp" value="257" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/FNN_with_gassian_noise_as_input.py</url>
+          <line>80</line>
+          <option name="timeStamp" value="258" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/Anaconda3/envs/py36/Lib/site-packages/imblearn/utils/_validation.py</url>
+          <line>338</line>
+          <option name="timeStamp" value="262" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/advance_mini_batching_with_torch_geometric.py</url>
+          <line>38</line>
+          <option name="timeStamp" value="264" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs/fnn_test.py</url>
+          <line>230</line>
+          <option name="timeStamp" value="270" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="y.max()" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$deepwalk_graph_class.coverage" NAME="deepwalk_graph_class Coverage Results" MODIFIED="1585755919458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Models" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$FNN_with_gassian_noise_as_input.coverage" NAME="FNN_with_gassian_noise_as_input Coverage Results" MODIFIED="1586070480256" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$pytorch_geometric.coverage" NAME="pytorch_geometric Coverage Results" MODIFIED="1585458265023" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Notebook/Libraries" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$logging_library.coverage" NAME="logging_library Coverage Results" MODIFIED="1585753971790" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$advance_mini_batching_with_torch_geometric.coverage" NAME="advance_mini_batching_with_torch_geometric Coverage Results" MODIFIED="1586061563619" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$os.coverage" NAME="os_library Coverage Results" MODIFIED="1585353335191" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$FNN.coverage" NAME="FNN Coverage Results" MODIFIED="1586042788706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/Modeling" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$test.coverage" NAME="test Coverage Results" MODIFIED="1585716893477" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$test_evalne.coverage" NAME="test_evalne Coverage Results" MODIFIED="1585204576016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$evaluator_example.coverage" NAME="evaluator_example Coverage Results" MODIFIED="1585240222380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/EvalNE1/examples" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$pytorch_geometric__1_.coverage" NAME="pytorch_geometric (1) Coverage Results" MODIFIED="1585526127904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$make_cora.coverage" NAME="make_cora Coverage Results" MODIFIED="1585778576597" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/Preparation/Data" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$fnn_test.coverage" NAME="fnn_test Coverage Results" MODIFIED="1586070644028" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$__main__.coverage" NAME="__main__ Coverage Results" MODIFIED="1585751983240" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/deepwalk/deepwalk" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$gcn.coverage" NAME="gcn Coverage Results" MODIFIED="1585787077125" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Models" />
+  </component>
+</project>

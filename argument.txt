@@ -1,0 +1,32 @@
+
+# karate_club
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\karate_club_added_edges_same_class_nodes.adjlist --output karate_added_same_class_nodes.embeddings
+
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\deepwalk\example_graphs\karate.adjlist --output karate.embeddings
+
+# cora
+## add new edges to same class nodes
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes.embeddings
+### experiment 3 = fixed percentage = 1 and noise_percentage = [0,0.2,0.5,0.8]
+### 0
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.embeddings
+### 0.2
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.2.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.2.embeddings
+### 0.5
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.5.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.5.embeddings
+### 0.8
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.8.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.8.embeddings
+
+### experiment 3 = fixed noise_percentage = 0 and percentage = [0.2,0.5,0.8]
+### 0.2
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.2_noise=0.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.2_noise=0.embeddings
+### 0.5
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.5_noise=0.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.5_noise=0.embeddings
+### 0.8
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.8_noise=0.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.8_noise=0.embeddings
+
+## add same class to new nodes
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_add_same_class_to_new_nodes.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_add_same_class_to_new_nodes.embeddings
+
+# citeseer
+--input C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\CiteSeer\citeseer.adjlist --output C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\CiteSeer\citeseer.embeddings
