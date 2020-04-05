@@ -79,8 +79,9 @@ class GeneratorNet(torch.nn.Module):
         x = self.out(x)
         return x
 
-def images_to_vectors(images):
-    return images.view(images.size(0), 784)
+def images_to_vectors(images, num_feat):
+    # return images.view(images.size(0), 784)
+    return images.view(images.size(0),num_feat )
 
 def vectors_to_images(vectors):
     return vectors.view(vectors.size(0), 1, 28, 28)
@@ -200,9 +201,12 @@ class CoraX(Dataset):
     def __init__(self,x , y ):
         self.x = x
         self.y = y
+
     def __getitem__(self, index):
         return self.x[index], self.y[index]
+
     def __len__(self):
+        # TODO What is the size here?
         return self.x.size()[0]
 
 
@@ -232,11 +236,12 @@ for epoch in range(num_epochs):
     for n_batch, (real_batch,_) in enumerate(data_loader_cora_x):
 
         # TODO here>> What is the input shape for genertor?
-        # TODO how do I modify imagest_to_vectors
 
+        # VALIDATE this should show batch_size?
         N = real_batch.size(0)
         # 1. Train Discriminator
-        real_data = Variable(images_to_vectors(real_batch))
+        real_data = Variable(images_to_vectors(real_batch, num_feat))
+        real_data = real_batch
         # Generate fake data and detach
         # (so gradients are not calculated for generator)
         fake_data = generator(noise(N)).detach()

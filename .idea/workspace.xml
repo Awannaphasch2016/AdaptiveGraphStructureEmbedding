@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fdbf46f6-a7d8-4165-bd78-8c6d3dc015c2" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenNE/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/OpenNE/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/deepwalk/deepwalk/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/deepwalk/deepwalk/__main__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs/fnn_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs/fnn_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,8 +46,8 @@
   </component>
   <component name="JupyterTrust" id="7cb7c8e8-a79d-467b-a1af-6c55c895e0af">
     <option name="files">
+      <option value="Examples\Libraries\EvalNE_library\test_evalne.ipynb" />
       <option value="Notebook\Libraries\torch_geometric.ipynb" />
-      <option value="test_evalne.ipynb" />
     </option>
   </component>
   <component name="ProjectId" id="1ZdK6JhwKvVPXAcQRNJhqlm3vfA" />
@@ -65,17 +64,17 @@
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora" />
-      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Models" />
-      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\AddSameClassEdges" />
-      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Libraries" />
-      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Output\TSNE" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\evalne\tests\data" />
       <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\EvalNE1\tests\data" />
       <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Libraries\EvalNE_library" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Models" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\AddSameClassEdges" />
+      <recent name="C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Examples\Libraries" />
     </key>
   </component>
   <component name="RunManager" selected="Python.fnn_test">
@@ -273,7 +272,7 @@
       <workItem from="1585763787898" duration="5119000" />
       <workItem from="1585773945892" duration="280000" />
       <workItem from="1585775092061" duration="14775000" />
-      <workItem from="1585949580946" duration="31866000" />
+      <workItem from="1585949580946" duration="34084000" />
     </task>
     <servers />
   </component>
@@ -345,73 +344,73 @@
     <state x="707" y="66" key="FileChooserDialogImpl/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585471554248" />
     <state x="580" y="164" width="438" height="478" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1585619999584" />
     <state x="580" y="172" key="FileChooserDialogImpl/0.0.1536.864@0.0.1536.864" timestamp="1585950256590" />
-    <state width="1537" height="288" key="GridCell.Tab.0.bottom" timestamp="1586070644202">
+    <state width="1537" height="288" key="GridCell.Tab.0.bottom" timestamp="1586113832058">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.0.bottom/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
     <state width="1537" height="274" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
-    <state width="1537" height="288" key="GridCell.Tab.0.bottom/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="288" key="GridCell.Tab.0.bottom/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113832058" />
     <state width="1537" height="244" key="GridCell.Tab.0.bottom/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
-    <state width="1537" height="288" key="GridCell.Tab.0.center" timestamp="1586070644202">
+    <state width="1537" height="288" key="GridCell.Tab.0.center" timestamp="1586113832057">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.0.center/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
     <state width="1537" height="274" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1585745647398" />
-    <state width="1537" height="288" key="GridCell.Tab.0.center/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="288" key="GridCell.Tab.0.center/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113832057" />
     <state width="1537" height="244" key="GridCell.Tab.0.center/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
-    <state width="1537" height="288" key="GridCell.Tab.0.left" timestamp="1586070644202">
+    <state width="1537" height="288" key="GridCell.Tab.0.left" timestamp="1586113832057">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.0.left/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
     <state width="1537" height="274" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1585745647398" />
-    <state width="1537" height="288" key="GridCell.Tab.0.left/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="288" key="GridCell.Tab.0.left/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113832057" />
     <state width="1537" height="244" key="GridCell.Tab.0.left/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
-    <state width="1537" height="288" key="GridCell.Tab.0.right" timestamp="1586070644202">
+    <state width="1537" height="288" key="GridCell.Tab.0.right" timestamp="1586113832057">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.0.right/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473167052" />
     <state width="1537" height="274" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1585745647398" />
-    <state width="1537" height="288" key="GridCell.Tab.0.right/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070644202" />
+    <state width="1537" height="288" key="GridCell.Tab.0.right/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113832057" />
     <state width="1537" height="244" key="GridCell.Tab.0.right/0.0.1536.864@0.0.1536.864" timestamp="1585947620836" />
-    <state width="1537" height="288" key="GridCell.Tab.1.bottom" timestamp="1586070661610">
+    <state width="1537" height="288" key="GridCell.Tab.1.bottom" timestamp="1586113847327">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.1.bottom/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
     <state width="1537" height="274" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
-    <state width="1537" height="288" key="GridCell.Tab.1.bottom/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.bottom/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113847327" />
     <state width="1537" height="288" key="GridCell.Tab.1.bottom/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
-    <state width="1537" height="288" key="GridCell.Tab.1.center" timestamp="1586070661610">
+    <state width="1537" height="288" key="GridCell.Tab.1.center" timestamp="1586113847327">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.1.center/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
     <state width="1537" height="274" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
-    <state width="1537" height="288" key="GridCell.Tab.1.center/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.center/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113847327" />
     <state width="1537" height="288" key="GridCell.Tab.1.center/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
-    <state width="1537" height="288" key="GridCell.Tab.1.left" timestamp="1586070661610">
+    <state width="1537" height="288" key="GridCell.Tab.1.left" timestamp="1586113847327">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.1.left/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
     <state width="1537" height="274" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
-    <state width="1537" height="288" key="GridCell.Tab.1.left/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.left/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113847327" />
     <state width="1537" height="288" key="GridCell.Tab.1.left/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
-    <state width="1537" height="288" key="GridCell.Tab.1.right" timestamp="1586070661610">
+    <state width="1537" height="288" key="GridCell.Tab.1.right" timestamp="1586113847327">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="1537" height="330" key="GridCell.Tab.1.right/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585473174499" />
     <state width="1537" height="274" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1585745647399" />
-    <state width="1537" height="288" key="GridCell.Tab.1.right/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586070661610" />
+    <state width="1537" height="288" key="GridCell.Tab.1.right/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113847327" />
     <state width="1537" height="288" key="GridCell.Tab.1.right/0.0.1536.864@0.0.1536.864" timestamp="1585947620821" />
     <state x="332" y="122" width="981" height="707" key="SettingsEditor" timestamp="1586042559865">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="332" y="117" width="981" height="707" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1585746702134" />
     <state x="332" y="122" key="SettingsEditor/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586042559865" />
-    <state width="498" height="468" key="SwitcherDM" timestamp="1586071727773">
+    <state width="498" height="468" key="SwitcherDM" timestamp="1586112675355">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="498" height="446" key="SwitcherDM/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585471565138" />
     <state width="498" height="446" key="SwitcherDM/0.0.1536.824@0.0.1536.824" timestamp="1585746783913" />
-    <state width="498" height="468" key="SwitcherDM/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586071727773" />
+    <state width="498" height="468" key="SwitcherDM/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586112675355" />
     <state width="498" height="468" key="SwitcherDM/0.0.1536.864@0.0.1536.864" timestamp="1585949835326" />
     <state x="361" y="146" key="Vcs.Push.Dialog.v2" timestamp="1585243400455">
       <screen x="0" y="0" width="1536" height="824" />
@@ -438,12 +437,12 @@
     </state>
     <state x="399" y="109" width="738" height="606" key="find.popup/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585422867694" />
     <state x="399" y="114" width="738" height="636" key="find.popup/0.0.1536.864@0.0.1536.864" timestamp="1585755798867" />
-    <state width="600" height="445" key="javadoc.popup" timestamp="1586071580179">
+    <state width="600" height="445" key="javadoc.popup" timestamp="1586113779499">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state width="600" height="424" key="javadoc.popup/0.0.1536.824/1920.0.1366.728@0.0.1536.824" timestamp="1585458819636" />
     <state width="600" height="424" key="javadoc.popup/0.0.1536.824@0.0.1536.824" timestamp="1585714629430" />
-    <state width="600" height="445" key="javadoc.popup/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586071580179" />
+    <state width="600" height="445" key="javadoc.popup/0.0.1536.864/1920.0.1366.768@0.0.1536.864" timestamp="1586113779499" />
     <state width="600" height="445" key="javadoc.popup/0.0.1536.864@0.0.1536.864" timestamp="1585782139935" />
     <state x="635" y="279" width="250" height="278" key="jetbrains.javascript.buildTools.run-task-popup" timestamp="1585190563465">
       <screen x="0" y="0" width="1536" height="824" />
@@ -616,8 +615,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs/fnn_test.py</url>
-          <line>230</line>
-          <option name="timeStamp" value="270" />
+          <line>242</line>
+          <option name="timeStamp" value="272" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -631,6 +630,13 @@
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="y.max()" language="Python" />
+        <watch expression="real_batch.T" language="Python" />
+        <watch expression="len(data_loader_cora_x)" language="Python" />
+        <watch expression="N" language="Python" />
+        <watch expression="real_batch" language="Python" />
+        <watch expression="real_batch[0]" language="Python" />
+        <watch expression="num_feat" language="Python" />
+        <watch expression="data_loader_x" language="Python" />
       </configuration>
     </watches-manager>
   </component>
@@ -647,7 +653,7 @@
     <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$evaluator_example.coverage" NAME="evaluator_example Coverage Results" MODIFIED="1585240222380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/EvalNE1/examples" />
     <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$pytorch_geometric__1_.coverage" NAME="pytorch_geometric (1) Coverage Results" MODIFIED="1585526127904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries" />
     <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$make_cora.coverage" NAME="make_cora Coverage Results" MODIFIED="1585778576597" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/Preparation/Data" />
-    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$fnn_test.coverage" NAME="fnn_test Coverage Results" MODIFIED="1586070644028" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs" />
+    <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$fnn_test.coverage" NAME="fnn_test Coverage Results" MODIFIED="1586113831860" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Libraries/PytorchGeometic/runs" />
     <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$__main__.coverage" NAME="__main__ Coverage Results" MODIFIED="1585751983240" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/deepwalk/deepwalk" />
     <SUITE FILE_PATH="coverage/AdaptiveGraphStructureEmbedding$gcn.coverage" NAME="gcn Coverage Results" MODIFIED="1585787077125" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Examples/Models" />
   </component>
