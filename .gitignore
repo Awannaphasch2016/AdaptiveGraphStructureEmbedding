@@ -1,5 +1,8 @@
 deepwalk/
 evalne/
 EvalNE/
-OpenNE
+OpenNE/
+.idea/
+__pycache__/
+venv/
 
