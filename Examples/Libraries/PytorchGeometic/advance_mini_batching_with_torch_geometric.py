@@ -36,10 +36,12 @@ y = y.numpy()
 #==make cora imbalance
 #=====================
 ind_x = np.arange(x.shape[0] ).reshape(-1,1)
+
 ind_x_, y_ = make_imbalance(ind_x, y, sampling_strategy=ratio_func,
                         **{"multiplier": 0.2,
                            "minority_class": 6}, )
 ind_x = ind_x.flatten()
+print()
 
 #=====================
 #==labeling only 5 percent of the dataset

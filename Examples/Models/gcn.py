@@ -1,23 +1,12 @@
-import os.path as osp
 import argparse
+import os.path as osp
 
-import torch
 import torch.nn.functional as F
-from torch_geometric.datasets import Planetoid
 import torch_geometric.transforms as T
-from torch_geometric.nn import GCNConv, ChebConv  # noqa
-from Examples.Models.InMemoryDataset_class import *
+from torch_geometric.datasets import Planetoid
+from torch_geometric.nn import GCNConv  # noqa
 
-
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--use_gdc', action='store_true',
-#                     help='Use GDC preprocessing.')
-# args = parser.parse_args()
-#
-# dataset = 'Cora'
-# path = osp.join(osp.dirname(osp.realpath(__file__)), '..', '..', 'Data', 'External')
-# dataset = Planetoid(path, dataset, T.NormalizeFeatures())
-# data = dataset[0]
+from Examples.Libraries.PytorchGeometic.InMemoryDataset_class import *
 
 
 # f = r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_percent=0_noise=0.adjlist'
@@ -38,13 +27,10 @@ from Examples.Models.InMemoryDataset_class import *
 # f = r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.adjlist'
 
 
-
-def convert_data( f):
-
-
+def convert_data(f):
     if f.split('.')[-1] == 'adjlist':
         # pass
-    # elif f.split('.')[-1] == 'embeddings':
+        # elif f.split('.')[-1] == 'embeddings':
         # TODO here>> figure out why file that is pass into process is changed to byte file
         G = process(f)
         import torch
@@ -55,12 +41,13 @@ def convert_data( f):
                 edge_index.append([i, n])
             x.append(i)
         # TODO currently it cannot yet accept node features.
-        data.edge_index =  torch.tensor(edge_index).transpose(1,0)
+        data.edge_index = torch.tensor(edge_index).transpose(1, 0)
     else:
-        raise  ValueError('no')
+        raise ValueError('no')
+
 
 class Net(torch.nn.Module):
-    def __init__(self ,data, dataset):
+    def __init__(self, data, dataset):
         super(Net, self).__init__()
         self.conv1 = GCNConv(dataset.num_features, 16, cached=True,
                              normalize=not args.use_gdc)
@@ -86,8 +73,6 @@ class Net(torch.nn.Module):
         # return F.log_softmax(x, dim=1)
 
 
-
-
 def train(model, optimizer):
     model.train()
     optimizer.zero_grad()
@@ -106,7 +91,8 @@ def test(model):
         accs.append(acc)
     return accs
 
-def run_gcn( model, optimizer):
+
+def run_gcn(model, optimizer):
     best_val_acc = test_acc = 0
     performance_history = {}
     for epoch in range(1, 201):
@@ -119,10 +105,11 @@ def run_gcn( model, optimizer):
         performance_history.setdefault('train_acc', f'{train_acc:0.4f}')
         performance_history.setdefault('val_acc', f'{best_val_acc:0.4f}')
         performance_history.setdefault('test_acc', f'{test_acc:0.4f}')
-        if epoch/50 == 0:
+        if epoch / 50 == 0:
             print(f'{epoch}')
             # print(log.format(epoch, train_acc, best_val_acc, test_acc))
-    return epoch, train_acc,best_val_acc, test_acc
+    return epoch, train_acc, best_val_acc, test_acc
+
 
 def init_gcn():
     dataset = 'Cora'
@@ -203,6 +190,7 @@ def init_gcn():
 #     #     f.write(txt)
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--use_gdc', action='store_true',
                         help='Use GDC preprocessing.')
@@ -214,7 +202,8 @@ if __name__ == '__main__':
     #      r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.005.adjlist']
     # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_percent=0_noise=0.adjlist']
     # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0005.adjlist']
-    f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.001.adjlist']
+    f = [
+        r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.001.adjlist']
     # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0015.adjlist']
     # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.002.adjlist']
     # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.005_noise=0.adjlist']
@@ -222,20 +211,13 @@ if __name__ == '__main__':
     # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.adjlist']
 
     for i in f:
-        data, dataset, model, optimizer=  init_gcn()
+        data, dataset, model, optimizer = init_gcn()
 
         convert_data(i)
         for i in range(100):
             log = 'Epoch: {:03d}, Train: {:.4f}, Val: {:.4f}, Test: {:.4f}'
-            epoch, train_acc, best_val_acc, test_acc = run_gcn( model,  optimizer)
+            epoch, train_acc, best_val_acc, test_acc = run_gcn(model, optimizer)
             if i <= 10:
                 print(log.format(epoch, train_acc, best_val_acc, test_acc))
             else:
                 exit()
-
-        exit()
-        # # Save a dictionary into a pickle file.
-        # import pickle
-        # favorite_color = {"lion": "yellow", "kitty": "red"}
-        # pickle.dump(favorite_color, open("save.p", "wb"))
-
