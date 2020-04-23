@@ -75,7 +75,7 @@ if __name__ == '__main__':
     data.num_classes = np.unique(data.y).shape[0]
 
     # select only minority data
-    
+
     # n_features = 1433
     gan.data.train_mask, gan.data.test_mask, gan.data.val_mask = readjust_ratio(gan.data.x, gan.data.y)
 
