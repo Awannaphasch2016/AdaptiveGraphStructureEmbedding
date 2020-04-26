@@ -1,5 +1,7 @@
 import numpy as np
+import os
 import matplotlib.pyplot as plt
+import pandas as pd
 import torch
 from torch import nn
 from torch import optim
@@ -205,6 +207,9 @@ class GAN:
     def __init__(self, data, data_loader):
         self.data = data
         self.data_loader = data_loader
+        self.d1_loss_hist = []
+        self.d2_loss_hist = []
+        self.g_loss_hist = []
 
     def train_generator(self, optimizer, fake_data):
         N = fake_data.size(0)
@@ -222,7 +227,20 @@ class GAN:
         # Update weights with gradients
         optimizer.step()
         # Return error
+        self.g_loss_hist.append(error.tolist())
         return error
+
+    def save_loss_to_file(self, folder='../Output/run_gan/'):
+        #create directory if not alreayd exist
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        self.d1_loss_hist = pd.DataFrame(self.d1_loss_hist)
+        self.d2_loss_hist = pd.DataFrame(self.d2_loss_hist)
+        self.g_loss_hist = pd.DataFrame(self.g_loss_hist)
+        self.d1_loss_hist.to_csv(f'{folder}d1_loss_hist.to_csv', index=False, header=False)
+        self.d2_loss_hist.to_csv(f'{folder}d2_loss_hist.to_csv', index=False,header=False)
+        self.g_loss_hist.to_csv(f'{folder}g_loss_hist.to_csv', index=False,header=False)
 
     def train_discriminator(self, optimizer, real_data, fake_data):
         N = real_data.size(0)
@@ -250,6 +268,9 @@ class GAN:
 
         # 1.3 Update weights with gradients
         optimizer.step()
+
+        self.d1_loss_hist.append(error_real.tolist())
+        self.d2_loss_hist.append(error_fake.tolist())
 
         # Return error and predictions for real and fake inputs
         return error_real + error_fake, prediction_real, prediction_fake
@@ -295,7 +316,6 @@ class GAN:
         return Variable(torch.LongTensor(np.random.randint(0, NUMCLASS, batch_size)))
 
     def run_gan(self):
-
         # # Load data
         # data = self.mnist_data()
 
@@ -350,6 +370,8 @@ class GAN:
                 # Log batch error
                 logger.log(d_error, g_error, epoch, n_batch, num_batches)
                 # Display Progress every few batches
+
+                self.save_loss_to_file()
 
                 if (n_batch) % 100 == 0:
                     # test_images = vectors_to_images(self.generator(test_noise))

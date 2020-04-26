@@ -71,17 +71,21 @@ if __name__ == '__main__':
     gan = gan_model.GAN(data, dataloader)
 
     new_y = relabel_minority_and_majority_classes(gan.data)
+    # select only minority data
+    new_y = new_y[np.where(new_y==0)]
+    data.x = data.x[np.where(new_y==0)]
     data.y = new_y
     data.num_classes = np.unique(data.y).shape[0]
 
-    # select only minority data
 
-    # n_features = 1433
-    gan.data.train_mask, gan.data.test_mask, gan.data.val_mask = readjust_ratio(gan.data.x, gan.data.y)
+
+    # # n_features = 1433
+    # gan.data.train_mask, gan.data.test_mask, gan.data.val_mask = readjust_ratio(gan.data.x, gan.data.y)
 
     # =====================
     # ==for gan
     # =====================
     gan.run_gan()
+    gan.save_loss_to_file()
 
 
