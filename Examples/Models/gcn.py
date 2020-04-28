@@ -1,6 +1,9 @@
 import argparse
 import os.path as osp
 
+# import dgl
+# from dgl.nn.pytorch import GraphConv
+#
 import torch.nn.functional as F
 import torch_geometric.transforms as T
 from torch_geometric.datasets import Planetoid
@@ -44,6 +47,7 @@ def convert_data(f):
         data.edge_index = torch.tensor(edge_index).transpose(1, 0)
     else:
         raise ValueError('no')
+
 
 
 class Net(torch.nn.Module):
@@ -118,13 +122,13 @@ def init_gcn():
     dataset = Planetoid(path, dataset, T.NormalizeFeatures())
     data = dataset[0]
 
-    if args.use_gdc:
-        gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
-                    normalization_out='col',
-                    diffusion_kwargs=dict(method='ppr', alpha=0.05),
-                    sparsification_kwargs=dict(method='topk', k=128,
-                                               dim=0), exact=True)
-        data = gdc(data)
+    # if args.use_gdc:
+    #     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
+    #                 normalization_out='col',
+    #                 diffusion_kwargs=dict(method='ppr', alpha=0.05),
+    #                 sparsification_kwargs=dict(method='topk', k=128,
+    #                                            dim=0), exact=True)
+    #     data = gdc(data)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model, data = Net(data, dataset).to(device), data.to(device)

@@ -1,3 +1,8 @@
+# import os,sys,inspect
+# current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+# parent_dir = os.path.dirname(current_dir)
+# sys.path.insert(0,parent_dir)
+
 from src.Modeling.gcn import *
 import numpy as np
 import pandas as pd
@@ -92,17 +97,45 @@ def readjust_ratio(x, y):
 
 
 if __name__ == '__main__':
-    dataset = 'Cora'
-    path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Data',
-                    'External')
+    #=====================
+    #==torch_geometric
+    #=====================
 
-    dataset = Planetoid(path, dataset, T.NormalizeFeatures())
-    data = dataset[0]
+    # dataset = 'Cora'
+    # path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Data',
+    #                 'External')
+    #
+    # dataset = Planetoid(path, dataset, T.NormalizeFeatures())
+    # data = dataset[0]
+    # relabel_minority_and_majority_classes(data)
+    #
+    # from torch_geometric.data import DataLoader
+    #
+    # dataloader = DataLoader(dataset)  # not re-labeled
+    # new_y = relabel_minority_and_majority_classes(data)
+    # data.y = new_y
+    # data.num_classes = np.unique(data.y).shape[0]
+
+    #=====================
+    #==dgl
+    #======================
+    # from dgl.data import CoraDataset
+    #
+    # data = CoraDataset()
+    # data.y = data.labels
+    # data.x = data.features
+    # data.num_features = data.x.shape[1]
+    # data.edge_index = np.array(data.graph.to_undirected().edges).T
+
+    data, _ = torch.load(r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\data\Cora\Cora\processed\data.pt')
+    new_y = relabel_minority_and_majority_classes(data)
+    data.y = new_y
+    data.num_classes = np.unique(data.y).shape[0]
+
     # relabel_minority_and_majority_classes(data)
 
     from torch_geometric.data import DataLoader
 
-    dataloader = DataLoader(dataset)  # not re-labeled
     new_y = relabel_minority_and_majority_classes(data)
     data.y = new_y
     data.num_classes = np.unique(data.y).shape[0]
@@ -117,7 +150,7 @@ if __name__ == '__main__':
     # ====================
     import src.Modeling.gcn as gcn_model
 
-    gcn = gcn_model.GCN(data, dataset)
+    gcn = gcn_model.GCN(data)
     # readjust_ratio(gcn.data.x, gcn.data.y)
     # print_ratio()
     # exit()
@@ -125,16 +158,29 @@ if __name__ == '__main__':
 
     def test():
         gcn.model.eval()
-        (emb_after_cov1, emb_after_cov2), accs = gcn.model(), []
+        # (emb_after_cov1, emb_after_cov2), accs = gcn.model(), []
+        (emb_after_cov1, emb_after_cov2), accs = gcn.model(gcn.get_dgl_graph()), []
         logits = F.log_softmax(emb_after_cov2, dim=1)
         # logits,  accs = self.model(), []
 
         # loss = F.nll_loss(x, y)
+
         # for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        for _, mask in gcn.data('train_mask', 'val_mask', 'test_mask'):
+        for _, mask in gcn.data('train_mask', 'val_mask', 'test_mask'): # torch_geometric
             pred = logits[mask].max(1)[1]
             acc = pred.eq(gcn.data.y[mask]).sum().item() / mask.sum().item()
             accs.append(acc)
+
+        # pred = logits.max(1)[1]
+        # acc= pred.eq(gcn.data.y).sum().item() / data.y.shape[0]
+        # accs.append(acc)
+
+        # for mask in [data.train_mask, data.val_mask, data.test_mask]:
+        #     mask = torch.tensor(mask).type(torch.BoolTensor)
+        #     pred = logits[mask].max(1)[1]
+        #     acc = pred.eq(gcn.data.y[mask]).sum().item() / mask.sum().item()
+        #     accs.append(acc)
+
         return accs
 
     best_val_acc = test_acc = 0
@@ -146,7 +192,12 @@ if __name__ == '__main__':
         gcn.loss_and_step(logits[data.train_mask],
                            data.y[data.train_mask])
 
+        acc = test()
+
+        # log = f'Epoch: {epoch:03d}, acc = {acc}'
+
         train_acc, val_acc, tmp_test_acc = test()
+
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc

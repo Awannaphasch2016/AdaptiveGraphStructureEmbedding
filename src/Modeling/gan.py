@@ -1,3 +1,8 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0,parent_dir)
+
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -34,8 +39,8 @@ class DiscriminatorNet(torch.nn.Module):
     def __init__(self):
         super(DiscriminatorNet, self).__init__()
             # n_features = 784
-        n_features = 1433
-        # n_features = 16
+        # n_features = 1433
+        n_features = 16
         n_out = 1
 
         # self.label_embedding = torch.nn.Embedding(NUMCLASS,NUMCLASS)
@@ -96,8 +101,8 @@ class GeneratorNet(torch.nn.Module):
 
     def __init__(self):
         super(GeneratorNet, self).__init__()
-        n_features = 1433
-        # n_features = 16
+        # n_features = 1433
+        n_features = 16
         # n_out = 784
 
         # n_features_and_class = n_features + NUMCLASS
@@ -148,8 +153,8 @@ def noise(size):
     Generates a 1-d vector of gaussian sampled random values
     '''
     # n = Variable(torch.randn(size, 100))
-    n = Variable(torch.randn(size, 1433))
-    # n = Variable(torch.randn(size, 16))
+    # n = Variable(torch.randn(size, 1433))
+    n = Variable(torch.randn(size, 16))
     return n
 
 
@@ -206,12 +211,15 @@ def plot_grad_flow(named_parameters):
 class GAN:
     def __init__(self, data, data_loader):
         self.data = data
-        self.data_loader = data_loader
+        # self.data_loader = data_loader
         self.d1_loss_hist = []
         self.d2_loss_hist = []
         self.g_loss_hist = []
+        self.num_batches = 1
 
     def train_generator(self, optimizer, fake_data):
+
+        print('running train_generator..')
         N = fake_data.size(0)
         # Reset gradients
         optimizer.zero_grad()
@@ -235,14 +243,15 @@ class GAN:
         if not os.path.exists(folder):
             os.makedirs(folder)
 
-        self.d1_loss_hist = pd.DataFrame(self.d1_loss_hist)
-        self.d2_loss_hist = pd.DataFrame(self.d2_loss_hist)
-        self.g_loss_hist = pd.DataFrame(self.g_loss_hist)
-        self.d1_loss_hist.to_csv(f'{folder}d1_loss_hist.to_csv', index=False, header=False)
-        self.d2_loss_hist.to_csv(f'{folder}d2_loss_hist.to_csv', index=False,header=False)
-        self.g_loss_hist.to_csv(f'{folder}g_loss_hist.to_csv', index=False,header=False)
+        self.d1_loss_hist_pd = pd.DataFrame(self.d1_loss_hist)
+        self.d2_loss_hist_pd = pd.DataFrame(self.d2_loss_hist)
+        self.g_loss_hist_pd = pd.DataFrame(self.g_loss_hist)
+        self.d1_loss_hist_pd.to_csv(f'{folder}d1_loss_hist.to_csv', index=False, header=False)
+        self.d2_loss_hist_pd.to_csv(f'{folder}d2_loss_hist.to_csv', index=False,header=False)
+        self.g_loss_hist_pd.to_csv(f'{folder}g_loss_hist.to_csv', index=False,header=False)
 
     def train_discriminator(self, optimizer, real_data, fake_data):
+        print('running train_discriminator..')
         N = real_data.size(0)
         # Reset gradients
         optimizer.zero_grad()
@@ -251,11 +260,8 @@ class GAN:
         # TODO what do I pass in as label of real_data?
         # gen_labels => real_label which is all 0. (minority class label)
         prediction_real = self.discriminator(real_data)
-        # Calculate error and backpropagate
         error_real = self.loss(prediction_real, ones_target(N))
 
-        # print('in train discrimintaor error_real ')
-        print(error_real.is_leaf)
         # TODO figure out whwy retain_graph is required here when other .backward() does not required it
         error_real.backward(retain_graph=True) # error here
 
@@ -322,7 +328,8 @@ class GAN:
         self.init_gan()
 
         # Num batches
-        num_batches = len(self.data_loader)
+        # num_batches = len(self.data_loader)
+        num_batches = self.num_batches
 
         num_test_samples = 16
         test_noise = noise(num_test_samples)
@@ -331,60 +338,64 @@ class GAN:
         # Total number of epochs to train
         num_epochs = 200
         for epoch in range(num_epochs):
-            # for n_batch, (real_batch,_) in enumerate(self.data_loader):
-            for n_batch, (
-                    batch_ind, edge_index, test_mask, train_mask, val_mask, x,
-                    y) in enumerate(self.data_loader):
 
-                batch_ind = batch_ind[1]
+            n_batch = 0
+            edge_index = self.data.edge_index
+            test_mask = self.data.test_mask
+            train_mask = self.data.train_mask
+            val_mask = self.data.val_mask
+            x = self.data.x
+            y = self.data.y
 
-                # edge_index = edge_index[1]
-                # test_mask = test_mask[1]
-                # train_mask = train_mask[1]
-                # val_mask = val_mask[1]
-                x = x[1]
-                # y = y[1]
+            # batch_ind = batch_ind[1]
 
-                # self.run_gan_once(batch_ind, x)
+            # edge_index = edge_index[1]
+            # test_mask = test_mask[1]
+            # train_mask = train_mask[1]
+            # val_mask = val_mask[1]
+            # x = x[1]
+            # y = y[1]
 
-                # N = batch_ind.size(0)
-                N = x.size(0)
-                # gen_labels = self.get_gen_labels_for_real_fake_minority_class(N)
+            # self.run_gan_once(batch_ind, x)
 
-                # 1. Train Discriminator
-                real_data = Variable(images_to_vectors(x))
-                # Generate fake data and detach
-                # (so gradients are not calculated for generator)
-                fake_data = self.generator(noise(N)).detach()
-                # Train D
-                d_error, d_pred_real, d_pred_fake = \
-                    self.train_discriminator(self.d_optimizer, real_data,
-                                             fake_data)
+            # N = batch_ind.size(0)
+            N = x.size(0)
+            # gen_labels = self.get_gen_labels_for_real_fake_minority_class(N)
 
-                # 2. Train Generator
-                # Generate fake data
-                fake_data = self.generator(noise(N))
+            # 1. Train Discriminator
+            real_data = Variable(images_to_vectors(x))
+            # Generate fake data and detach
+            # (so gradients are not calculated for generator)
+            fake_data = self.generator(noise(N)).detach()
+            # Train D
+            d_error, d_pred_real, d_pred_fake = \
+                self.train_discriminator(self.d_optimizer, real_data,
+                                         fake_data)
 
-                # Train G
-                g_error = self.train_generator(self.g_optimizer, fake_data)
-                # Log batch error
-                logger.log(d_error, g_error, epoch, n_batch, num_batches)
-                # Display Progress every few batches
+            # 2. Train Generator
+            # Generate fake data
+            fake_data = self.generator(noise(N))
 
-                self.save_loss_to_file()
+            # Train G
+            g_error = self.train_generator(self.g_optimizer, fake_data)
+            # Log batch error
+            logger.log(d_error, g_error, epoch, n_batch, num_batches)
+            # Display Progress every few batches
 
-                if (n_batch) % 100 == 0:
-                    # test_images = vectors_to_images(self.generator(test_noise))
-                    # test_images = test_images.data
-                    # logger.log_images(
-                    #     test_images, num_test_samples,
-                    #     epoch, n_batch, num_batches
-                    # )
+            self.save_loss_to_file()
 
-                    # Display status Logs
-                    logger.display_status(
-                        epoch, num_epochs, n_batch, num_batches,
-                        d_error, g_error, d_pred_real, d_pred_fake)
+            if (n_batch) % 100 == 0:
+                # test_images = vectors_to_images(self.generator(test_noise))
+                # test_images = test_images.data
+                # logger.log_images(
+                #     test_images, num_test_samples,
+                #     epoch, n_batch, num_batches
+                # )
+
+                # Display status Logs
+                logger.display_status(
+                    epoch, num_epochs, n_batch, num_batches,
+                    d_error, g_error, d_pred_real, d_pred_fake)
 
 
 if __name__ == '__main__':

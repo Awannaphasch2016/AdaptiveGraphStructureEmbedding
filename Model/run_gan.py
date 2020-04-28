@@ -3,8 +3,10 @@ import numpy as np
 import src.Modeling.gan as gan_model
 import os.path as osp
 import torch.nn.functional as F
+
 import torch_geometric.transforms as T
 from torch_geometric.datasets import Planetoid
+
 from torch_geometric.nn import GCNConv  # noqa
 
 def relabel_minority_and_majority_classes(data):
@@ -56,19 +58,30 @@ if __name__ == '__main__':
     # dtype = torch.float
     # device = torch.device("gpu")
 
-    dataset = 'Cora'
-    path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Data',
-                    'External')
+    #=====================
+    #==torch_geometric
+    #=====================
 
-    dataset = Planetoid(path, dataset, T.NormalizeFeatures())
-    data = dataset[0]
-    # relabel_minority_and_majority_classes(data)
+    # dataset = 'Cora'
+    # path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Data',
+    #                 'External')
+    # dataset = Planetoid(path, dataset, T.NormalizeFeatures())
+    # data = dataset[0]
+    # # relabel_minority_and_majority_classes(data)
+    # from torch_geometric.data import DataLoader
+    # dataloader = DataLoader(dataset)  # not re-labeled
 
-    from torch_geometric.data import DataLoader
+    #=====================
+    #==dgl
+    #=====================
 
-    dataloader = DataLoader(dataset)  # not re-labeled
+    data, _ = torch.load(r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\data\Cora\Cora\processed\data.pt')
+    new_y = relabel_minority_and_majority_classes(data)
+    data.y = new_y
+    data.num_classes = np.unique(data.y).shape[0]
 
-    gan = gan_model.GAN(data, dataloader)
+
+    gan = gan_model.GAN(data)
 
     new_y = relabel_minority_and_majority_classes(gan.data)
     # select only minority data

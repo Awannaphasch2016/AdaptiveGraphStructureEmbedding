@@ -1,3 +1,11 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0,parent_dir)
+# import warnings
+#
+# warnings.simplefilter("error")
+# warnings.simplefilter("ignore", DeprecationWarning)
 import os.path as osp
 from collections import Counter
 import scipy.sparse as sp
@@ -144,6 +152,7 @@ class MyNewModel:
                     self.min_class_data_loader_for_gan):
 
             # if True:
+                # TODO here>> why does real have feature = 16 and fake have feature = 1433??
                 N = real_batch.size(0)
                 real_data = real_batch
                 ### for torch_geometric dataloader
@@ -153,7 +162,7 @@ class MyNewModel:
 
                 # gen_labels = self.gan.get_gen_labels_for_real_fake_minority_class(N)
                 # fake_data = self.gan.generator(gan_model.noise(N)).detach()
-                fake_data = self.gan.generator(gan_model.noise(N))
+                fake_data = self.gan.generator(gan_model.noise(N)) # 10, 1433
 
                 # print(f'before train discriminator {n_batch}')
                 d_error, d_pred_real, d_pred_fake = \
@@ -215,6 +224,9 @@ class MyNewModel:
             test_select_minreal_minfake_majreal_ind_boolean = np.random.permutation(test_select_minreal_minfake_majreal_ind_boolean)
 
             # self.data.y = minreal_minfake_majreal_y
+            trainning_select_minreal_minfake_majreal_ind_boolean = torch.tensor(trainning_select_minreal_minfake_majreal_ind_boolean).type(torch.BoolTensor)
+            test_select_minreal_minfake_majreal_ind_boolean = torch.tensor(test_select_minreal_minfake_majreal_ind_boolean).type(torch.BoolTensor)
+
             self.data.train_mask = trainning_select_minreal_minfake_majreal_ind_boolean
             self.data.test_mask = test_select_minreal_minfake_majreal_ind_boolean
 
@@ -233,7 +245,7 @@ class MyNewModel:
 
             self.gcn.model.eval()
 
-            (emb_after_cov1, emb_after_cov2), accs = self.gcn.model(), []
+            (emb_after_cov1, emb_after_cov2), accs = self.gcn.model(self.gcn.get_dgl_graph()), []
             # for test
             logits = self.gcn.discriminator(emb_after_conv1, fake_data)
             # logits = F.log_softmax(emb_after_cov2, dim=1)
@@ -255,7 +267,7 @@ class MyNewModel:
             #==gcn performance
             #=====================
 
-            print(f'Epoch: {epoch:03d}, Train: (acc={train_acc:.4f}, loss={trainning_loss:.4f}), Test: (acc={test_acc:.4f}, loss={test_loss:.4f})')
+            print(f'Epoch: {epoch:03d}, Train: (acc={train_acc:.4f}, loss={trainning_loss:.4f}), Test: (acc={tmp_test_acc:.4f}, loss={test_loss:.4f})')
 
     def init_my_new_model(self):
         # =====================
@@ -295,7 +307,7 @@ class MyNewModel:
         # =====================
         # ==for Gcn
         # ====================
-        self.gcn = gcn_model.GCN(self.data, self.dataset)
+        self.gcn = gcn_model.GCN(self.data)
 
 
 def ratio_func(y, multiplier, minority_class):

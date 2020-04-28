@@ -1,6 +1,13 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0,parent_dir)
+
 import argparse
 import os.path as osp
 
+import dgl
+from dgl.nn.pytorch import GraphConv
 import torch.nn.functional as F
 import torch_geometric.transforms as T
 from torch_geometric.datasets import Planetoid
@@ -50,44 +57,87 @@ def get_gen_labels_for_min_and_maj():
     pass
 
 class Net(torch.nn.Module):
-    def __init__(self, data, dataset):
+    def __init__(self, data):
         super(Net, self).__init__()
         self.data = data
-        # TODO here>> figure out what is a good dimension of input to approximate real data using MLP
-        self.conv1 = GCNConv(dataset.num_features, 16, cached=True,
-                             normalize=not args.use_gdc)
-        self.conv2 = GCNConv(16, self.data.num_classes, cached=True,
-                             normalize=not args.use_gdc)
-        # self.conv1 = ChebConv(data.num_features, 16, K=2)
-        # self.conv2 = ChebConv(16, data.num_features, K=2)
+        self.conv1 = GraphConv(data.num_features, 16)
+        self.conv2 = GraphConv(16, data.num_classes)
 
-        self.reg_params = self.conv1.parameters()
-        self.non_reg_params = self.conv2.parameters()
-        self.embedded_x = None
+    def forward(self, g):
+        '''
 
-    def forward(self):
-        # TODO preprocess .adjlist so that it output the following: x, edge_index, edge_weight.
-        x, edge_index, edge_weight = self.data.x, self.data.edge_index, self.data.edge_attr
+        :param g: DGL graph.
+        :return:
+        '''
+        # x, edge_index, edge_weight = self.data.x, self.data.edge_index, self.data.edge_attr
+        x, edge_index = self.data.x, self.data.edge_index
 
-        x = self.conv1(x, edge_index, edge_weight)
-        x_after_cov1 = x
-        x = F.relu(x)
-        x = F.dropout(x, training=self.training)
-        x = self.conv2(x, edge_index, edge_weight)
-        x_after_cov2 = x
-        # x = F.log_softmax(x, dim=1)
+        # what is input? edge_index or x?
+        h = self.conv1(g, x) # here what is input to conv1?
+        x_after_conv1 = h
+        h = torch.relu(h)
+        h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
+        h = self.conv2(g, h)
+        x_after_conv2 = h
 
-        return x_after_cov1, x_after_cov2
+        return x_after_conv1, x_after_conv2
 
-        # return F.log_softmax(x, dim=1)
+            #         x = self.conv1(x, edge_index, edge_weight)
+            #         x_after_cov1 = x
+            #         x = F.relu(x)
+            #         x = F.dropout(x, training=self.training)
+            #         x = self.conv2(x, edge_index, edge_weight)
+            #         x_after_cov2 = x
+            #         # x = F.log_softmax(x, dim=1)
+
+
+    # class Net(torch.nn.Module):
+    #     def __init__(self, data, dataset):
+    #         super(Net, self).__init__()
+    #         self.data = data
+    #         # TODO here>> figure out what is a good dimension of input to approximate real data using MLP
+    #         self.conv1 = GCNConv(dataset.num_features, 16, cached=True,
+    #                              normalize=not args.use_gdc)
+    #         self.conv2 = GCNConv(16, self.data.num_classes, cached=True,
+    #                              normalize=not args.use_gdc)
+    #         # self.conv1 = ChebConv(data.num_features, 16, K=2)
+    #         # self.conv2 = ChebConv(16, data.num_features, K=2)
+    #
+    #         self.reg_params = self.conv1.parameters()
+#         self.non_reg_params = self.conv2.parameters()
+#         self.embedded_x = None
+#
+#     def forward(self):
+#         # TODO preprocess .adjlist so that it output the following: x, edge_index, edge_weight.
+#         x, edge_index, edge_weight = self.data.x, self.data.edge_index, self.data.edge_attr
+#
+#         x = self.conv1(x, edge_index, edge_weight)
+#         x_after_cov1 = x
+#         x = F.relu(x)
+#         x = F.dropout(x, training=self.training)
+#         x = self.conv2(x, edge_index, edge_weight)
+#         x_after_cov2 = x
+#         # x = F.log_softmax(x, dim=1)
+#
+#         return x_after_cov1, x_after_cov2
+#
+#         # return F.log_softmax(x, dim=1)
 
 class GCN:
-    def __init__(self,data, dataset):
+    def __init__(self,data):
         self.data = data
-        self.dataset = dataset
+        # self.dataset = dataset
         self.model = None
         self.optimizer = None
         self.init_gcn()
+
+    def get_dgl_graph(self):
+        src = self.data.edge_index[0]
+        dst = self.data.edge_index[1]
+        import numpy as np
+        u = np.concatenate([src, dst])
+        v = np.concatenate([dst, src])
+        return dgl.DGLGraph((u,v))
 
     def loss(self, x, y):
         return F.nll_loss(x,y)
@@ -114,7 +164,17 @@ class GCN:
 
     def train(self):
         self.model.train()
-        x_after_conv1, x_after_conv2 = self.model()
+        #=====================
+        #==torch geometric
+        #=====================
+        
+        # x_after_conv1, x_after_conv2 = self.model()
+
+        #=====================
+        #==dgl
+        #=====================
+        
+        x_after_conv1, x_after_conv2 = self.model(self.get_dgl_graph())
 
         # # TODO here>> move code below to discriminator()
         # if external_input is not None:
@@ -139,7 +199,8 @@ class GCN:
     # def test(self):
     def test(self, data, y ):
         self.model.eval()
-        (emb_after_cov1, emb_after_cov2), accs = self.model(), []
+        # (emb_after_cov1, emb_after_cov2), accs = self.model(), [] # torch_geometric
+        (emb_after_cov1, emb_after_cov2), accs = self.model(self.get_dgl_graph()), [] # gdl
         logits = F.log_softmax(emb_after_cov2, dim=1)
         # logits,  accs = self.model(), []
 
@@ -195,11 +256,25 @@ class GCN:
             self.data = gdc(self.data)
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model, self.data = Net(self.data, self.dataset).to(device), self.data.to(device)
-        self.optimizer = torch.optim.Adam([
-            dict(params=self.model.reg_params, weight_decay=5e-4),
-            dict(params=self.model.non_reg_params, weight_decay=0)
-        ], lr=0.01)
+        # self.model, self.data = Net(self.data).to(device), self.data.to(device) # torch_geometric
+        self.model, self.data = Net(self.data).to(device), self.data
+
+        # #=====================
+        # #==torch parameters
+        # #=====================
+        # self.optimizer = torch.optim.Adam([
+        #     dict(params=self.model.reg_params, weight_decay=5e-4),
+        #     dict(params=self.model.non_reg_params, weight_decay=0)
+        # ], lr=0.01)
+
+        #=====================
+        #==dgl
+        #=====================
+        import itertools
+        # what is type of x?
+        self.optimizer = torch.optim.Adam(itertools.chain(self.model.parameters()), lr=0.01)
+        # self.optimizer = torch.optim.Adam(itertools.chain(self.model.parameters(),self.data.x.parameters()), lr=0.01)
+
 
         # return data, dataset, self.model, optimizer
 
