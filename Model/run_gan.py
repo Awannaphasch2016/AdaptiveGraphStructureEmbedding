@@ -99,6 +99,6 @@ if __name__ == '__main__':
     # ==for gan
     # =====================
     gan.run_gan()
-    gan.save_loss_to_file()
+    # gan.save_loss_to_file()
 
 
