@@ -14,6 +14,7 @@ def preparing_cora_for_new_purposed_model(isLog=False):
 
     data, _ = torch.load(
         r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\data\Cora\Cora\processed\data.pt')
+    data.y_before_relabel = data.y
     new_y = relabel_minority_and_majority_classes(data, isLog=isLog)
     data.y = new_y
     data.num_classes = np.unique(data.y).shape[0]

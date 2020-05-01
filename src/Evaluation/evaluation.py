@@ -2,14 +2,32 @@ import copy
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import auc
 from sklearn.metrics import classification_report
-
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
 
 from src.Visualization.visualize_performance import *
 
+
+def get_total_roc_auc_score(y_true, y_score):
+    normalized_row = np.apply_along_axis(lambda x: [i / sum(x) for i in x], 1,
+                                         y_score)
+    ## create total_roc_auc_score; output shape = 1
+    # if 2 == np.unique(y_true).shape[0] and 2 == normalized_row.shape[1]:
+    if 2 == y_score.shape[1] and 2 == normalized_row.shape[1]:
+        total_roc_auc_score = roc_auc_score(y_true, normalized_row[:, 0],
+                                            multi_class='ovo')
+    else:
+        total_roc_auc_score = roc_auc_score(y_true, normalized_row,
+                                            multi_class='ovo')
+
+    return total_roc_auc_score
+
+
 def report_performance(y_true, y_pred, y_score, labels, verbose=None,
-                       plot=False, return_value_for_cv=False):
+                       plot=False, return_value_for_cv=False, save_path=None,
+                       file_name=None):
     """
     usecase:
         report_performance( np.array([0,1,2]), np.array([0, 2,2]), np.array([0.4,0.3,0.3, 0.3,0.4,0.3, 0.3, 0.3,0.4]).reshape(3,-1) , np.array([0,1,2]) , verbose=True)
@@ -24,9 +42,17 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
            report_final_performance_report_np: type = numpy
            columns_of_performance_metric:  type = list: desc = list of performance metrics name
     """
+
+    if save_path is not None and isinstance(save_path, str):
+        assert isinstance(file_name,
+                          str), "file_name must be specified to avoid ambiguity"
+        import os
+        os.makedirs(save_path, exist_ok=True)
+        save_file = save_path + f'{file_name}.csv'
+
     assert verbose is not None, "verbose must be specified to avoid ambiguity"
 
-    assert len(labels) > 1 , "minimum label = 2 (aka binary classification)"
+    assert len(labels) > 1, "minimum label = 2 (aka binary classification)"
 
     report_sklearn_classification_report = classification_report(y_true,
                                                                  y_pred,
@@ -37,8 +63,10 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
 
     # # TODO wtf is this paragraph?
     del report_dict['accuracy']
-    report_dict['accuracy'] = {'precision': report_sklearn_classification_report['accuracy'], 'recall': None,
-                               'f1-score': None, 'support': None}
+    report_dict['accuracy'] = {
+        'precision': report_sklearn_classification_report['accuracy'],
+        'recall': None,
+        'f1-score': None, 'support': None}
 
     # --------add micro avg
     micro_avg = {}
@@ -58,12 +86,14 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
     divider = labels.shape[0]
 
     x = micro_avg.copy()
-    for i,j in micro_avg.items():
-        x[i] = sum(j)/divider
+    for i, j in micro_avg.items():
+        x[i] = sum(j) / divider
     micro_avg = x
 
-    report_dict['micro average'] = {'precision': micro_avg['precision'], 'recall': micro_avg['recall'],
-                               'f1-score': micro_avg['f1-score'],'support': None}
+    report_dict['micro average'] = {'precision': micro_avg['precision'],
+                                    'recall': micro_avg['recall'],
+                                    'f1-score': micro_avg['f1-score'],
+                                    'support': None}
 
     report_df = pd.DataFrame(report_dict).round(2).transpose()
 
@@ -86,10 +116,6 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
 
     # show AUC
     ## normalized to probability: ( This is a hack; because roc_auc_score only accept probaility like y_score .
-    from sklearn.metrics import roc_auc_score
-    normalized_row = np.apply_along_axis(lambda x: [i / sum(x) for i in x], 1,
-                                         y_score)
-
 
     # TODO figure out why roc score is very low? what did I do wrong?
     ## read how get_roc_curve() works
@@ -106,24 +132,22 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
     roc_auc_df = pd.DataFrame.from_dict(roc_auc).transpose()
     roc_auc_df.columns = ['AUC']
 
-
-    ## create total_roc_auc_score; output shape = 1
-    if 2 == np.unique(y_true).shape[0] and 2 == normalized_row.shape[1]:
-        total_roc_auc_score = roc_auc_score(y_true, normalized_row[:, 1],
-                                            multi_class='ovo')
-    else:
-        total_roc_auc_score = roc_auc_score(y_true, normalized_row,
-                                            multi_class='ovo')
+    total_roc_auc_score = get_total_roc_auc_score(y_true, y_score)
 
     if plot:
-        visualize_roc_curve(fpr, tpr, roc_auc)
+        visualize_roc_curve(fpr, tpr, roc_auc, save_path=save_path,
+                            file_name=file_name)
 
     return combine_report_and_auc(report_df, report_support_pred_class,
-                                  roc_auc_df, total_roc_auc_score,  verbose=verbose,
-                                  return_value_for_cv=return_value_for_cv)
+                                  roc_auc_df, total_roc_auc_score,
+                                  verbose=verbose,
+                                  return_value_for_cv=return_value_for_cv,
+                                  save_file=save_file)
+
 
 def combine_report_and_auc(report_df, report_support_pred_class,
-                           roc_auc_df,total_roc_auc_score, verbose, return_value_for_cv):
+                           roc_auc_df, total_roc_auc_score, verbose,
+                           return_value_for_cv, save_file=None):
     # create mask
     ## create mask for report_support_pred_class that have the smae index as report_df.index (fill with nan)
     na_np = np.tile(np.nan, (
@@ -150,14 +174,11 @@ def combine_report_and_auc(report_df, report_support_pred_class,
     na_np = np.tile(np.nan, (
         report_df.shape[0], roc_auc_df.shape[1]))
 
-
-
     roc_auc_mask_with_nan_df = pd.DataFrame(na_np, index=report_df.index,
                                             columns=roc_auc_df.columns)
 
     roc_auc_mask_with_nan_df.loc[:roc_auc_df.shape[0],
     :] = roc_auc_df.values
-
 
     roc_auc_mask_with_nan_df.loc['acc/total'] = total_roc_auc_score
     roc_auc_mask_with_nan_df.loc['macro avg'] = float('nan')
@@ -169,11 +190,15 @@ def combine_report_and_auc(report_df, report_support_pred_class,
     # merged_report_df = report_df.merge(report_support_pred_class, how='outer', on=['support'], copy=False, right_index=True)
     if verbose:
         print(merged_report_df)
+    if save_file is not None:
+        merged_report_df.to_csv(save_file)
+        pass
 
     if return_value_for_cv:
         return merged_report_df.to_numpy(), merged_report_df.columns, merged_report_df.index
 
-def get_roc_curve(y_true, y_score, n_classes ):
+
+def get_roc_curve(y_true, y_score, n_classes):
     """
     refer back to the following link : https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html#sphx-glr-auto-examples-model-selection-plot-roc-py
 
@@ -190,9 +215,10 @@ def get_roc_curve(y_true, y_score, n_classes ):
         fpr[i], tpr[i], _ = roc_curve(y_true[:, i], y_score[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
 
-    return  fpr, tpr, roc_auc
+    return fpr, tpr, roc_auc
 
 
 if __name__ == '__main__':
-
-    report_performance( np.array([0,1,2]), np.array([0, 2,2]), np.array([0.4,0.3,0.3, 0.3,0.4,0.3, 0.3, 0.3,0.4]).reshape(3,-1) , np.array([0,1,2]) , verbose=True)
+    report_performance(np.array([0, 1, 2]), np.array([0, 2, 2]), np.array(
+        [0.4, 0.3, 0.3, 0.3, 0.4, 0.3, 0.3, 0.3, 0.4]).reshape(3, -1),
+                       np.array([0, 1, 2]), verbose=True)

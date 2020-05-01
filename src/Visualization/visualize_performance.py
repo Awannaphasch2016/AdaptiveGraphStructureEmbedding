@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def visualize_roc_curve(fpr, tpr, roc_auc):
+def visualize_roc_curve(fpr, tpr, roc_auc, save_path=None, file_name=None):
     """
     refer back to the following link : https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html#sphx-glr-auto-examples-model-selection-plot-roc-py
     @param fpr: type = dict
@@ -8,6 +8,9 @@ def visualize_roc_curve(fpr, tpr, roc_auc):
     @param roc_auc: type = dict
     @return:
     """
+    if save_path is not None and isinstance(save_path, str):
+        assert isinstance(file_name, str), "file_name must be specified to avoid ambiguity"
+        save_file = save_path + f'roc_{file_name}.png'
 
     plt.figure()
     lw = 2
@@ -23,4 +26,5 @@ def visualize_roc_curve(fpr, tpr, roc_auc):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic example')
     plt.legend(loc="lower right")  # todo show legen of all class_roc_curve
+    plt.savefig(save_file)
     plt.show()

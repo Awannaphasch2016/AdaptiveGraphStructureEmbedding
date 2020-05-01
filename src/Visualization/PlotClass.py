@@ -53,11 +53,13 @@ class PlotClass:
         if self.row_col is not None:
             if self.row_col[0] == 1 or self.row_col[1] == 1:
                 ind = ax_tuple[0] if ax_tuple[0] != 0 else ax_tuple[1]
-                self.axs[ind].set(xlabel='epochs',ylabel='val' ,title=name)
+                # self.axs[ind].set(xlabel='epochs',ylabel='val' ,title=name)
+                self.axs[ind].set(ylabel='val' ,title=name)
                 self.axs[ind].plot(self.hist[name], label=name)
                 self.axs[ind].legend()
             else:
-                self.axs[ax_tuple[0]][ax_tuple[1]].set(xlabel='epochs',ylabel='val' ,title=name)
+                # self.axs[ax_tuple[0]][ax_tuple[1]].set(xlabel='epochs',ylabel='val' ,title=name)
+                self.axs[ax_tuple[0]][ax_tuple[1]].set(ylabel='val' ,title=name)
                 self.axs[ax_tuple[0]][ax_tuple[1]].plot(self.hist[name], label=name)
                 self.axs[ax_tuple[0]][ax_tuple[1]].legend()
         else:
