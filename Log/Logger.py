@@ -5,7 +5,7 @@ import logging
 
 class Logger(object):
 
-    def __init__(self, name='logger', level=logging.DEBUG):
+    def __init__(self, name, level=logging.DEBUG):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level)
 

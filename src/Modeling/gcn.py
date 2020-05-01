@@ -61,67 +61,45 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
         self.data = data
         self.conv1 = GraphConv(data.num_features, 16)
-        self.conv2 = GraphConv(16, data.num_classes)
+        self.conv2 = GraphConv(16, 16)
+        self.conv3 = GraphConv(16, data.num_classes)
 
-    def forward(self, g):
+        import torch.nn as nn
+        self.discriminator = nn.Sequential(
+            nn.Linear(16, 8),
+            nn.ReLU(),
+            nn.Linear(8, 2),
+        )
+
+    def forward(self, g, x , get_conv1_emb=False, external_input=None):
         '''
 
         :param g: DGL graph.
         :return:
         '''
-        # x, edge_index, edge_weight = self.data.x, self.data.edge_index, self.data.edge_attr
-        x, edge_index = self.data.x, self.data.edge_index
 
-        # what is input? edge_index or x?
-        h = self.conv1(g, x) # here what is input to conv1?
-        x_after_conv1 = h
-        h = torch.relu(h)
-        h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
-        h = self.conv2(g, h)
-        x_after_conv2 = h
+        if get_conv1_emb:
+            h = self.conv1(g, x) # here what is input to conv1?
+            x_after_conv1 = h
+            return x_after_conv1
 
-        return x_after_conv1, x_after_conv2
+        if external_input is not None:
+            h = torch.relu(x)
+            h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
 
-            #         x = self.conv1(x, edge_index, edge_weight)
-            #         x_after_cov1 = x
-            #         x = F.relu(x)
-            #         x = F.dropout(x, training=self.training)
-            #         x = self.conv2(x, edge_index, edge_weight)
-            #         x_after_cov2 = x
-            #         # x = F.log_softmax(x, dim=1)
+            h = self.conv2(g, h)
+            x_after_conv2 = h
+            h = torch.relu(x)
+            h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
 
+            h = torch.cat((x, external_input), dim=0)
+            h = self.discriminator(h)
 
-    # class Net(torch.nn.Module):
-    #     def __init__(self, data, dataset):
-    #         super(Net, self).__init__()
-    #         self.data = data
-    #         # TODO here>> figure out what is a good dimension of input to approximate real data using MLP
-    #         self.conv1 = GCNConv(dataset.num_features, 16, cached=True,
-    #                              normalize=not args.use_gdc)
-    #         self.conv2 = GCNConv(16, self.data.num_classes, cached=True,
-    #                              normalize=not args.use_gdc)
-    #         # self.conv1 = ChebConv(data.num_features, 16, K=2)
-    #         # self.conv2 = ChebConv(16, data.num_features, K=2)
-    #
-    #         self.reg_params = self.conv1.parameters()
-#         self.non_reg_params = self.conv2.parameters()
-#         self.embedded_x = None
-#
-#     def forward(self):
-#         # TODO preprocess .adjlist so that it output the following: x, edge_index, edge_weight.
-#         x, edge_index, edge_weight = self.data.x, self.data.edge_index, self.data.edge_attr
-#
-#         x = self.conv1(x, edge_index, edge_weight)
-#         x_after_cov1 = x
-#         x = F.relu(x)
-#         x = F.dropout(x, training=self.training)
-#         x = self.conv2(x, edge_index, edge_weight)
-#         x_after_cov2 = x
-#         # x = F.log_softmax(x, dim=1)
-#
-#         return x_after_cov1, x_after_cov2
-#
-#         # return F.log_softmax(x, dim=1)
+            logits = F.log_softmax(h, dim=1)
+
+            return x_after_conv2,  logits
+        else:
+            raise ValueError('error')
 
 class GCN:
     def __init__(self,data):
@@ -143,23 +121,20 @@ class GCN:
         return F.nll_loss(x,y)
 
     def loss_and_step(self, x, y):
+        self.optimizer.zero_grad()
         loss = self.loss(x,y)
-        # loss = F.nll_loss(x, y)
-        # RuntimeError: Trying to backward through the graph a second time, but the buffers have already been freed. Specify retain_graph=True when calling backward the first time.
         loss.backward(retain_graph=True)
-        # F.nll_loss(x.type(torch.float),y).backward()
         self.optimizer.step()
         return loss
-        # return logits
 
     def discriminator(self, model_emb, external_input = None):
         if external_input is not None:
             x_as_input_to_softmax = torch.cat((model_emb, external_input), dim=0)
         else:
             x_as_input_to_softmax = model_emb
-        # TODO
+        # TODO change log_softmax to discriminator here
         logits = F.log_softmax(x_as_input_to_softmax, dim=1)
-        self.optimizer.zero_grad()
+        # self.optimizer.zero_grad()
         return logits
 
     def train(self):
@@ -176,40 +151,22 @@ class GCN:
         
         x_after_conv1, x_after_conv2 = self.model(self.get_dgl_graph())
 
-        # # TODO here>> move code below to discriminator()
-        # if external_input is not None:
-        #     x_as_input_to_softmax = torch.cat((x_after_conv1, external_input), dim=0)
-        # else:
-        #     x_as_input_to_softmax = x_after_conv2
-        # # TODO
-        # logits = F.log_softmax(x_as_input_to_softmax, dim=1)
-        # self.optimizer.zero_grad()
-
-        # return logits
-        # F.nll_loss(self.model()[self.data.train_mask], self.data.y[self.data.train_mask]).backward()
-        # self.loss(logits[self.data.train_mask], self.data.y[self.data.train_mask])
-        # F.nll_loss(logits[self.data.train_mask], self.data.y[self.data.train_mask]).backward()
-
         return x_after_conv1, x_after_conv2
-        # return x_after_conv1, x_after_conv2, logits
-        # return model.embedded_x
 
 
     @torch.no_grad()
     # def test(self):
     def test(self, data, y ):
         self.model.eval()
-        # (emb_after_cov1, emb_after_cov2), accs = self.model(), [] # torch_geometric
+
         (emb_after_cov1, emb_after_cov2), accs = self.model(self.get_dgl_graph()), [] # gdl
         logits = F.log_softmax(emb_after_cov2, dim=1)
-        # logits,  accs = self.model(), []
 
-        # loss = F.nll_loss(x, y)
-        # for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         for _, mask in data('train_mask', 'test_mask'):
             pred = logits[mask].max(1)[1]
             acc = pred.eq(y[mask]).sum().item() / mask.sum().item()
             accs.append(acc)
+
         return accs
 
     def run_gcn(self):
@@ -241,12 +198,6 @@ class GCN:
 
     def init_gcn(self):
 
-        # dataset = 'Cora'
-        # path = osp.join(osp.dirname(osp.realpath(__file__)), '..', '..', 'Data',
-        #                 'External')
-        # dataset = Planetoid(path, dataset, T.NormalizeFeatures())
-        # data = dataset[0]
-
         if args.use_gdc:
             gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
                         normalization_out='col',
@@ -256,7 +207,7 @@ class GCN:
             self.data = gdc(self.data)
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # self.model, self.data = Net(self.data).to(device), self.data.to(device) # torch_geometric
+
         self.model, self.data = Net(self.data).to(device), self.data
 
         # #=====================

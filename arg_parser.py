@@ -17,6 +17,7 @@ example of a command argument assuming that current directory is my_utility/pyth
         parser.add_argument('--weighted_class', default=[1,1,1,1,1], nargs='+', help='list of weighted_class of diseases only in order <0,1,2,3,4,5>')
 '''
 parser = argparse.ArgumentParser()
+parser.add_argument('--log', action='store_true', help="")
 
 #--------main
 parser.add_argument('--use_gdc', action='store_true',

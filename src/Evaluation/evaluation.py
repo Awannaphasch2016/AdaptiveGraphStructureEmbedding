@@ -1,0 +1,198 @@
+import copy
+
+import numpy as np
+import pandas as pd
+from sklearn.metrics import classification_report
+
+from sklearn.metrics import roc_curve, auc
+
+from src.Visualization.visualize_performance import *
+
+def report_performance(y_true, y_pred, y_score, labels, verbose=None,
+                       plot=False, return_value_for_cv=False):
+    """
+    usecase:
+        report_performance( np.array([0,1,2]), np.array([0, 2,2]), np.array([0.4,0.3,0.3, 0.3,0.4,0.3, 0.3, 0.3,0.4]).reshape(3,-1) , np.array([0,1,2]) , verbose=True)
+
+    @param y_true: shape = (# of instance,); type = np.array or list
+    @param y_pred:  shape = (# of instance,); type = np.array or list
+    @param y_score: shape = (# of instance, # of class); type = np.array
+    @param labels: shape = (# of labels) eg. [0, 1, 2]; we need to be implicit because sometimes some labels are not predicted.
+    @param plot:
+    @param return_value_for_cv:
+    @return: desc = return value if return_value_for_cv is True;
+           report_final_performance_report_np: type = numpy
+           columns_of_performance_metric:  type = list: desc = list of performance metrics name
+    """
+    assert verbose is not None, "verbose must be specified to avoid ambiguity"
+
+    assert len(labels) > 1 , "minimum label = 2 (aka binary classification)"
+
+    report_sklearn_classification_report = classification_report(y_true,
+                                                                 y_pred,
+                                                                 labels,
+                                                                 output_dict=True)
+
+    report_dict = copy.deepcopy(report_sklearn_classification_report)
+
+    # # TODO wtf is this paragraph?
+    del report_dict['accuracy']
+    report_dict['accuracy'] = {'precision': report_sklearn_classification_report['accuracy'], 'recall': None,
+                               'f1-score': None, 'support': None}
+
+    # --------add micro avg
+    micro_avg = {}
+    for i, j in report_sklearn_classification_report.items():
+        try:
+            if float(i) in labels:
+                for x, y in j.items():
+                    if x == 'precision':
+                        micro_avg.setdefault('precision', []).append(float(y))
+                    elif x == 'f1-score':
+                        micro_avg.setdefault('f1-score', []).append(float(y))
+                    elif x == 'recall':
+                        micro_avg.setdefault('recall', []).append(float(y))
+        except:
+            pass
+
+    divider = labels.shape[0]
+
+    x = micro_avg.copy()
+    for i,j in micro_avg.items():
+        x[i] = sum(j)/divider
+    micro_avg = x
+
+    report_dict['micro average'] = {'precision': micro_avg['precision'], 'recall': micro_avg['recall'],
+                               'f1-score': micro_avg['f1-score'],'support': None}
+
+    report_df = pd.DataFrame(report_dict).round(2).transpose()
+
+    # show support class and predicted classes
+    ## note: np.unique output sorted value
+    supported_class_np, supported_class_freq_np = np.unique(y_true,
+                                                            return_counts=True)
+    predicted_class_np, predicted_class_freq_np = np.unique(y_pred,
+                                                            return_counts=True)
+
+    support_class_df = pd.DataFrame(supported_class_freq_np,
+                                    columns=['support'],
+                                    index=supported_class_np)
+    predicted_class_df = pd.DataFrame(predicted_class_freq_np,
+                                      columns=['predicted'],
+                                      index=predicted_class_np)
+
+    report_support_pred_class = pd.concat(
+        [support_class_df, predicted_class_df], axis=1)
+
+    # show AUC
+    ## normalized to probability: ( This is a hack; because roc_auc_score only accept probaility like y_score .
+    from sklearn.metrics import roc_auc_score
+    normalized_row = np.apply_along_axis(lambda x: [i / sum(x) for i in x], 1,
+                                         y_score)
+
+
+    # TODO figure out why roc score is very low? what did I do wrong?
+    ## read how get_roc_curve() works
+    ##  create per class roc_auc_score; output shape = [# of instances]
+    fpr, tpr, roc_auc = get_roc_curve(pd.get_dummies(y_true).to_numpy(),
+                                      y_score, np.unique(y_true).shape[0])
+
+    roc_auc = {i: [j] for i, j in roc_auc.items()}
+    # todo this is just avg not micro avg
+    # TODO create macro_avg,
+    roc_auc['avg'] = np.array(
+        [j for i in roc_auc.values() for j in i]).mean()
+
+    roc_auc_df = pd.DataFrame.from_dict(roc_auc).transpose()
+    roc_auc_df.columns = ['AUC']
+
+
+    ## create total_roc_auc_score; output shape = 1
+    if 2 == np.unique(y_true).shape[0] and 2 == normalized_row.shape[1]:
+        total_roc_auc_score = roc_auc_score(y_true, normalized_row[:, 1],
+                                            multi_class='ovo')
+    else:
+        total_roc_auc_score = roc_auc_score(y_true, normalized_row,
+                                            multi_class='ovo')
+
+    if plot:
+        visualize_roc_curve(fpr, tpr, roc_auc)
+
+    return combine_report_and_auc(report_df, report_support_pred_class,
+                                  roc_auc_df, total_roc_auc_score,  verbose=verbose,
+                                  return_value_for_cv=return_value_for_cv)
+
+def combine_report_and_auc(report_df, report_support_pred_class,
+                           roc_auc_df,total_roc_auc_score, verbose, return_value_for_cv):
+    # create mask
+    ## create mask for report_support_pred_class that have the smae index as report_df.index (fill with nan)
+    na_np = np.tile(np.nan, (
+        report_df.shape[0], report_support_pred_class.shape[1]))
+
+    tmp = np.array(list(report_df.index))
+    acc_ind = np.where(tmp == 'accuracy')
+    tmp[acc_ind] = 'acc/total'
+    report_df.index = tmp
+
+    report_support_pred_class_mask_with_nan_df = pd.DataFrame(na_np,
+                                                              index=report_df.index,
+                                                              columns=report_support_pred_class.columns)
+    report_support_pred_class_mask_with_nan_df.loc[
+    :report_support_pred_class.shape[0],
+    :] = report_support_pred_class.values
+    # print(na_df)
+
+    report_support_pred_class_mask_with_nan_with_predicted_col_df = \
+        report_support_pred_class_mask_with_nan_df[['predicted']]
+
+    ## create maks for roc_auc_df to have same index as report_df.index (fill with nan)
+
+    na_np = np.tile(np.nan, (
+        report_df.shape[0], roc_auc_df.shape[1]))
+
+
+
+    roc_auc_mask_with_nan_df = pd.DataFrame(na_np, index=report_df.index,
+                                            columns=roc_auc_df.columns)
+
+    roc_auc_mask_with_nan_df.loc[:roc_auc_df.shape[0],
+    :] = roc_auc_df.values
+
+
+    roc_auc_mask_with_nan_df.loc['acc/total'] = total_roc_auc_score
+    roc_auc_mask_with_nan_df.loc['macro avg'] = float('nan')
+    # print(na_df)
+
+    merged_report_df = pd.concat([report_df,
+                                  report_support_pred_class_mask_with_nan_with_predicted_col_df,
+                                  roc_auc_mask_with_nan_df], axis=1)
+    # merged_report_df = report_df.merge(report_support_pred_class, how='outer', on=['support'], copy=False, right_index=True)
+    if verbose:
+        print(merged_report_df)
+
+    if return_value_for_cv:
+        return merged_report_df.to_numpy(), merged_report_df.columns, merged_report_df.index
+
+def get_roc_curve(y_true, y_score, n_classes ):
+    """
+    refer back to the following link : https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html#sphx-glr-auto-examples-model-selection-plot-roc-py
+
+    @param y_true: type = numpy; desc = onehot vector
+    @param y_score: type = numpy; desc = onehot vector
+    @return:
+    """
+
+    # Compute ROC curve and ROC area for each clasu
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_true[:, i], y_score[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    return  fpr, tpr, roc_auc
+
+
+if __name__ == '__main__':
+
+    report_performance( np.array([0,1,2]), np.array([0, 2,2]), np.array([0.4,0.3,0.3, 0.3,0.4,0.3, 0.3, 0.3,0.4]).reshape(3,-1) , np.array([0,1,2]) , verbose=True)

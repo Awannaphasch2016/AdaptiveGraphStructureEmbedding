@@ -16,6 +16,10 @@ from torchvision import transforms
 
 import arg_parser as args
 from Examples.Models.GAN.utils import Logger
+import Log.Logger as Logging
+from arg_parser import args
+
+log = Logging.Logger(name='log_for_train_model_file')
 
 ## global variables
 BATCHSIZE = 100
@@ -81,6 +85,9 @@ class GeneratorNet(torch.nn.Module):
     """
 
     def __init__(self):
+        if args.log:
+            log.info('init GeneratorNet')
+
         super(GeneratorNet, self).__init__()
         # n_features = 1433
         n_features = 16
@@ -109,6 +116,9 @@ class GeneratorNet(torch.nn.Module):
         # )
 
     def forward(self, x):
+        if args.log:
+            log.info('in GeneratorNet().forward()')
+
         gen_input = x
         gen_input = self.hidden(gen_input)
         gen_input = self.hidden(gen_input)
@@ -120,6 +130,9 @@ def noise(size):
     '''
     Generates a 1-d vector of gaussian sampled random values
     '''
+    if args.log:
+        log.info('in noise')
+
     n = Variable(torch.randn(size, 16))
     # n = Variable(torch.randn(size, 1433))
     return n
@@ -128,6 +141,9 @@ def ones_target(size):
     '''
     Tensor containing ones, with shape = size
     '''
+    if args.log:
+        log.info('in ones_target')
+
     data = Variable(torch.ones(size, 1))
     return data
 
@@ -136,6 +152,9 @@ def zeros_target(size):
     '''
     Tensor containing zeros, with shape = size
     '''
+    if args.log:
+        log.info('in zeros_target')
+
     data = Variable(torch.zeros(size, 1))
     return data
 
@@ -159,6 +178,8 @@ class GAN:
         self.num_batches = 1
 
     def train_generator(self, optimizer, fake_data):
+        if args.log:
+            log.info('in train_generator')
 
         N = fake_data.size(0)
 
@@ -173,6 +194,9 @@ class GAN:
         return error
 
     def save_loss_to_file(self, folder='../Output/run_gan/'):
+        if args.log:
+            log.info('in save_loss_to_file')
+
         #create directory if not alreayd exist
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -185,6 +209,8 @@ class GAN:
         self.g_loss_hist_pd.to_csv(f'{folder}g_loss_hist.to_csv', index=False,header=False)
 
     def train_discriminator(self, optimizer, real_data, fake_data):
+        if args.log:
+            log.info('in train_discriminator')
 
         N = real_data.size(0)
         # Reset gradients
@@ -216,6 +242,9 @@ class GAN:
         return error_real + error_fake, prediction_real, prediction_fake
 
     def init_gan(self):
+        if args.log:
+            log.info('in init_gan')
+
         self.discriminator = DiscriminatorNet()
         self.generator = GeneratorNet()
         self.d_optimizer = optim.Adam(self.discriminator.parameters(),
@@ -224,9 +253,13 @@ class GAN:
         self.loss = nn.BCELoss()
 
     def get_gen_labels_for_real_fake_minority_class(self, batch_size):
+        if args.log:
+            log.info('in get_gen_labels_for_real_fake_minority_class')
         return Variable(torch.LongTensor(np.random.randint(0, NUMCLASS, batch_size)))
 
     def run_gan(self):
+        if args.log:
+            log.info('in run_gan')
 
         self.init_gan()
 
