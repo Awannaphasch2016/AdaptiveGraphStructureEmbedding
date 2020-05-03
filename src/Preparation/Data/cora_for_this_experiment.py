@@ -6,7 +6,7 @@ import numpy as np
 def relabel_minority_and_majority_classes(data, isLog=False):
 
     uniq_labels = np.unique(data.y, return_counts=True)
-    minority_class = np.unique(data.y, return_counts=True)[1].argmax()
+    minority_class = np.unique(data.y, return_counts=True)[1].argmin()
     new_y = np.array([0 if i == minority_class else 1 for i in data.y])
     return new_y
 

@@ -59,47 +59,71 @@ def get_gen_labels_for_min_and_maj():
 class Net(torch.nn.Module):
     def __init__(self, data):
         super(Net, self).__init__()
+        # feat = 1433
+        feat = 16
+        feat2 = 8
         self.data = data
-        self.conv1 = GraphConv(data.num_features, 16)
-        self.conv2 = GraphConv(16, 16)
-        self.conv3 = GraphConv(16, data.num_classes)
+        self.conv1 = GraphConv(data.num_features, feat)
+        self.conv2 = GraphConv(feat, feat)
+        # self.conv3 = GraphConv(16, data.num_classes)
 
         import torch.nn as nn
         self.discriminator = nn.Sequential(
-            nn.Linear(16, 8),
+            nn.Linear(feat, feat2),
             nn.ReLU(),
-            nn.Linear(8, 2),
+            nn.Linear(feat2, 2),
         )
 
-    def forward(self, g, x , get_conv1_emb=False, external_input=None):
+    def forward(self, g, x , get_conv1_emb=False, external_input=None, run_all=False, run_discriminator=False):
         '''
 
         :param g: DGL graph.
         :return:
         '''
 
-        if get_conv1_emb:
+        if run_all:
+            assert not run_discriminator and not get_conv1_emb, 'error'
             h = self.conv1(g, x) # here what is input to conv1?
             x_after_conv1 = h
-            return x_after_conv1
 
-        if external_input is not None:
-            h = torch.relu(x)
+            h = torch.relu(h)
             h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
 
             h = self.conv2(g, h)
             x_after_conv2 = h
-            h = torch.relu(x)
+            h = torch.relu(h)
             h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
 
-            h = torch.cat((x, external_input), dim=0)
+            h = torch.cat((h, external_input), dim=0) if external_input is not None else h
             h = self.discriminator(h)
 
             logits = F.log_softmax(h, dim=1)
 
-            return x_after_conv2,  logits
+            return logits
         else:
-            raise ValueError('error')
+            if get_conv1_emb:
+                h = self.conv1(g, x) # here what is input to conv1?
+                x_after_conv1 = h
+                return x_after_conv1
+
+            if run_discriminator:
+                h = torch.relu(x)
+                h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
+
+                h = self.conv2(g, h)
+                x_after_conv2 = h
+                h = torch.relu(h)
+                h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
+
+                # h = torch.cat((x, external_input), dim=0) if external_input is not None else h
+                h = torch.cat((h, external_input), dim=0) if external_input is not None else h
+                h = self.discriminator(h)
+
+                logits = F.log_softmax(h, dim=1)
+
+                return x_after_conv2,  logits
+            else:
+                raise ValueError('choose: run_all, get_conv1_emb, run_discriminator')
 
 class GCN:
     def __init__(self,data):

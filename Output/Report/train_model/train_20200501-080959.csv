@@ -1,0 +1,7 @@
+,precision,recall,f1-score,support,predicted,AUC
+0,1.0,0.8,0.89,5.0,4.0,1.0
+1,0.94,1.0,0.97,15.0,16.0,1.0
+macro avg,0.97,0.9,0.93,20.0,,
+weighted avg,0.95,0.95,0.95,20.0,,
+acc/total,0.95,,,,,1.0
+micro average,0.97,0.9,0.93,,,

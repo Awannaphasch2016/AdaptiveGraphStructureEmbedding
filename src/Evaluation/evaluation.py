@@ -26,7 +26,7 @@ def get_total_roc_auc_score(y_true, y_score):
 
 
 def report_performance(y_true, y_pred, y_score, labels, verbose=None,
-                       plot=False, return_value_for_cv=False, save_path=None,
+                       plot=False, return_value_for_cv=False, save_status=None, save_path=None,
                        file_name=None):
     """
     usecase:
@@ -42,7 +42,11 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
            report_final_performance_report_np: type = numpy
            columns_of_performance_metric:  type = list: desc = list of performance metrics name
     """
+    assert isinstance(save_status,bool), ''
+    pd.set_option('max_columns', None)
+    pd.set_option('expand_frame_repr', False)
 
+    save_file = None
     if save_path is not None and isinstance(save_path, str):
         assert isinstance(file_name,
                           str), "file_name must be specified to avoid ambiguity"
@@ -58,6 +62,7 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
                                                                  y_pred,
                                                                  labels,
                                                                  output_dict=True)
+
 
     report_dict = copy.deepcopy(report_sklearn_classification_report)
 
@@ -126,48 +131,73 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
     roc_auc = {i: [j] for i, j in roc_auc.items()}
     # todo this is just avg not micro avg
     # TODO create macro_avg,
-    roc_auc['avg'] = np.array(
-        [j for i in roc_auc.values() for j in i]).mean()
+    # roc_auc['avg'] = np.array(
+    #     [j for i in roc_auc.values() for j in i]).mean()
 
     roc_auc_df = pd.DataFrame.from_dict(roc_auc).transpose()
     roc_auc_df.columns = ['AUC']
 
     total_roc_auc_score = get_total_roc_auc_score(y_true, y_score)
 
+    pred_each_class_ind = {i:np.where(y_pred==i)[0] for i in labels}
+    acc_per_class_dict = {}
+    for i,j in pred_each_class_ind.items():
+        if j.shape[0] == 0:
+            acc_per_class_dict[str(i)]=0
+        else:
+            y_true_mask = y_true[j]
+            y_pred_mask = y_pred[j]
+            acc_per_class_dict[str(i)] = [np.equal(y_true_mask,y_pred_mask).sum(0)/y_pred_mask.shape[0]]
+
+    # acc_per_class_dict = {}
+    # for i in range(labels.shape[0]):
+    #     ans  = report_df.iloc[i]['support']/report_support_pred_class.iloc[i]['predicted']
+    #     ans = 0 if np.isnan(ans) else ans
+    #     acc_per_class_dict.setdefault(str(i), [ans])
+    acc_per_class_df = pd.DataFrame.from_dict(acc_per_class_dict).transpose()
+    acc_per_class_df.columns = ['ACC']
+
     if plot:
         visualize_roc_curve(fpr, tpr, roc_auc, save_path=save_path,
-                            file_name=file_name)
+                            file_name=file_name, save_status=save_status)
 
     return combine_report_and_auc(report_df, report_support_pred_class,
-                                  roc_auc_df, total_roc_auc_score,
+                                  roc_auc_df, total_roc_auc_score, acc_per_class_df,
                                   verbose=verbose,
                                   return_value_for_cv=return_value_for_cv,
-                                  save_file=save_file)
+                                  save_file=save_file, save_status=save_status)
 
 
 def combine_report_and_auc(report_df, report_support_pred_class,
-                           roc_auc_df, total_roc_auc_score, verbose,
-                           return_value_for_cv, save_file=None):
+                           roc_auc_df, total_roc_auc_score, acc_per_class_df, verbose,
+                           return_value_for_cv, save_file=None, save_status=None):
+    assert save_status is not None, "save_status must be specified to avoid ambiguity"
     # create mask
     ## create mask for report_support_pred_class that have the smae index as report_df.index (fill with nan)
-    na_np = np.tile(np.nan, (
+    support_pred_na_np = np.tile(np.nan, (
         report_df.shape[0], report_support_pred_class.shape[1]))
+    acc_per_class_na_np = np.tile(np.nan, (
+        report_df.shape[0], acc_per_class_df.shape[1]))
 
     tmp = np.array(list(report_df.index))
     acc_ind = np.where(tmp == 'accuracy')
     tmp[acc_ind] = 'acc/total'
     report_df.index = tmp
 
-    report_support_pred_class_mask_with_nan_df = pd.DataFrame(na_np,
+    report_support_pred_class_mask_with_nan_df = pd.DataFrame(support_pred_na_np,
                                                               index=report_df.index,
                                                               columns=report_support_pred_class.columns)
     report_support_pred_class_mask_with_nan_df.loc[
     :report_support_pred_class.shape[0],
     :] = report_support_pred_class.values
-    # print(na_df)
-
     report_support_pred_class_mask_with_nan_with_predicted_col_df = \
         report_support_pred_class_mask_with_nan_df[['predicted']]
+
+    report_acc_per_class_mask_with_nan_df = pd.DataFrame(acc_per_class_na_np,
+                                                              index=report_df.index,
+                                                              columns=acc_per_class_df.columns)
+    report_acc_per_class_mask_with_nan_df.loc[:acc_per_class_df.shape[0],:] = acc_per_class_df.values
+
 
     ## create maks for roc_auc_df to have same index as report_df.index (fill with nan)
 
@@ -186,16 +216,22 @@ def combine_report_and_auc(report_df, report_support_pred_class,
 
     merged_report_df = pd.concat([report_df,
                                   report_support_pred_class_mask_with_nan_with_predicted_col_df,
+                                    report_acc_per_class_mask_with_nan_df,
                                   roc_auc_mask_with_nan_df], axis=1)
     # merged_report_df = report_df.merge(report_support_pred_class, how='outer', on=['support'], copy=False, right_index=True)
+    if save_status:
+        print(f"save report_performance to {save_file} ...")
+        if save_file is not None:
+            merged_report_df.to_csv(save_file)
+    else:
+        print(f"{save_file} is not save because save_status is False")
+
     if verbose:
         print(merged_report_df)
-    if save_file is not None:
-        merged_report_df.to_csv(save_file)
-        pass
 
     if return_value_for_cv:
-        return merged_report_df.to_numpy(), merged_report_df.columns, merged_report_df.index
+        return merged_report_df
+        # return merged_report_df.to_numpy(), merged_report_df.columns, merged_report_df.index
 
 
 def get_roc_curve(y_true, y_score, n_classes):

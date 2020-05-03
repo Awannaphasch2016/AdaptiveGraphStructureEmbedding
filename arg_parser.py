@@ -19,9 +19,18 @@ example of a command argument assuming that current directory is my_utility/pyth
 parser = argparse.ArgumentParser()
 parser.add_argument('--log', action='store_true', help="")
 
-#--------main
+#--------general
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
+parser.add_argument('--run_gcn_only', action='store_true', help="")
+parser.add_argument('--save_file', '-sf', action='store_true', help="")
+parser.add_argument('--save_plot', '-sp', action='store_true', help="")
+parser.add_argument('--save_cv_file', '-scf', action='store_true', help="")
+parser.add_argument('--save_cv_plot', '-scp', action='store_true', help="")
+parser.add_argument('--plot_roc', '-pr', action='store_true', help="")
+parser.add_argument('--plot_cv_roc', '-pcr', action='store_true', help="")
+parser.add_argument('--k_fold_split', type=str, default=3, help='')
+parser.add_argument('--num_gan_epoch', type=str, default=3, help='')
 #-- utilities
 
 

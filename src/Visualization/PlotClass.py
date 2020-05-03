@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
+from collections.abc import Iterable
+import torch
+import numbers
+import numpy as np
 import pickle
 import os
 
 class PlotClass:
-    def __init__(self):
+    def __init__(self, save_status):
         '''
         usecase
         :plotting loss
@@ -24,8 +28,52 @@ class PlotClass:
             plt.save_fig()
 
         '''
+
+        assert isinstance(save_status, bool) , 'please specified save_plot attribute in PlotClass to be boolean'
+
         self.hist = {}
         self.plt = plt
+        self.save_status = {}
+
+    def collect_hist_using_list_of_name(self, name_and_val_dict, ):
+
+       assert isinstance(name_and_val_dict, dict), ''
+
+       for name, val in name_and_val_dict.items():
+           self.collect_hist(name, val)
+
+    def plot_using_list_of_name(self, subplot_size,name_and_tuple_dict,save_file_name, title=None):
+        assert isinstance(subplot_size, tuple), ''
+        assert isinstance(name_and_tuple_dict, dict), ''
+
+
+        self.set_subplots(subplot_size)
+        if title is not None:
+            assert isinstance(title, str), ''
+            self.fig.suptitle(title)
+        for name, tuple_pos in name_and_tuple_dict.items():
+            if isinstance(tuple_pos, Iterable):
+                try:
+                    for i in tuple_pos:
+                        assert isinstance(i,
+                                          tuple), 'tuple_pos canot be iterate over'
+                        assert i[0] - 1 <= subplot_size[0], 'tuple_pos too largs'
+                        assert i[1] - 1 <= subplot_size[1], 'tuple_pos too largs'
+                        self.plot_each_hist(i, name=name)
+                except:
+                    assert isinstance(tuple_pos,
+                                      tuple), 'tuple_pos canot be iterate over'
+                    assert tuple_pos[0] - 1 <= subplot_size[
+                        0], 'tuple_pos too largs'
+                    assert tuple_pos[1] - 1 <= subplot_size[
+                        1], 'tuple_pos too largs'
+                    self.plot_each_hist(tuple_pos, name=name)
+            else:
+                    raise ValueError('tuple_pos canot be iterate over')
+        self.save_hist_with_pickel(name=f'{save_file_name}.pickle')
+        self.save_fig(
+            name=f'{save_file_name}.png')
+        self.plt.show()
 
     def collect_hist(self, name, val):
         """
@@ -34,7 +82,26 @@ class PlotClass:
         :param val: int, float
         :return:
         """
-        self.hist.setdefault(name, []).append(val)
+        if not isinstance(val, numbers.Number):
+            if isinstance(val,np.ndarray):
+                val = val.flatten()
+                assert val.ndim == 1, 'e'
+                for i in val:
+                    self.hist.setdefault(name, []).append(i)
+            elif isinstance(val, torch.Tensor):
+                try:
+                    val = torch.flatten(val).detach().numpy()
+                except:
+                    val = torch.flatten(val)
+
+                assert val.ndim == 1, 'e'
+                for i in val:
+                    self.hist.setdefault(name, []).append(i)
+
+            else:
+                raise ValueError('only accept val of type number or numpy or torch.Tensor')
+        else:
+            self.hist.setdefault(name, []).append(val)
 
     def set_subplots(self, row_col):
         self.row_col = row_col
@@ -60,11 +127,10 @@ class PlotClass:
             else:
                 # self.axs[ax_tuple[0]][ax_tuple[1]].set(xlabel='epochs',ylabel='val' ,title=name)
                 self.axs[ax_tuple[0]][ax_tuple[1]].set(ylabel='val' ,title=name)
-                self.axs[ax_tuple[0]][ax_tuple[1]].plot(self.hist[name], label=name)
+                self.axs[ax_tuple[0]][ax_tuple[1]].plot(np.array(self.hist[name]).flatten(), label=name)
                 self.axs[ax_tuple[0]][ax_tuple[1]].legend()
         else:
             raise ValueError('use plot_hist instead of plot_each_hist')
-        print()
 
 
     def show(self):
@@ -78,16 +144,28 @@ class PlotClass:
         self.plt.show()
 
     # def save_fig(self, path=r'Output/Plot/', name=None):
-    def save_hist_with_pickel(self ,path=f'C:\\Users\\Anak\\PycharmProjects\\AdaptiveGraphStructureEmbedding\\Output\\Plot\\', name=None):
+    def save_hist_with_pickel(self ,path=f'C:\\Users\\Anak\\PycharmProjects\\AdaptiveGraphStructureEmbedding\\Output\\Plot\\', name=None, key=None):
+        '''name_of_file should reflect hist key that is dumped'''
         assert name is not None, "name must be specified to avoid ambiguity"
-        save_path = path+ name
-        os.makedirs(path,exist_ok=True)
-        with open(save_path, 'wb') as p:
-            pickle.dump(self.hist, p)
-
+        save_path = path + name
+        if self.save_status:
+            print(f'saving pickle to {save_path} .. ')
+            os.makedirs(path,exist_ok=True)
+            if key is not None:
+                hist = self.hist[key]
+            else:
+                hist = self.hist
+            with open(save_path, 'wb') as p:
+                pickle.dump(hist, p)
+        else:
+            print(f'save_status is false => pickle is not saved to {save_path}')
     def save_fig(self, path=r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Output\Plot\\', name=None):
         # permission denied
         assert name is not None, "name must be specified to avoid ambiguity"
         save_path = path + name
-        os.makedirs(path,exist_ok=True)
-        self.fig.savefig(save_path, format= 'png')
+        if self.save_status:
+            print(f'saving figure to {save_path} .. ')
+            os.makedirs(path,exist_ok=True)
+            self.fig.savefig(save_path, format= 'png')
+        else:
+            print(f'save_status is false => figure is not saved to {save_path}')
