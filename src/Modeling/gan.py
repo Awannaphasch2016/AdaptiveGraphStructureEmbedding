@@ -170,12 +170,13 @@ def mnist_data():
                           download=True)
 
 class GAN:
-    def __init__(self, data):
+    def __init__(self, data, device='cpu'):
         self.data = data
         self.d1_loss_hist = []
         self.d2_loss_hist = []
         self.g_loss_hist = []
         self.num_batches = 1
+        self.device = device
 
     def train_generator(self, optimizer, fake_data):
         if args.log:
@@ -184,9 +185,9 @@ class GAN:
         N = fake_data.size(0)
 
         optimizer.zero_grad()
-        prediction = self.discriminator(fake_data)
+        prediction = self.discriminator(fake_data.to(self.device))
 
-        error = self.loss(prediction, ones_target(N))
+        error = self.loss(prediction, ones_target(N).to(self.device))
         error.backward()
         optimizer.step()
         self.g_loss_hist.append(error.tolist())
@@ -219,16 +220,16 @@ class GAN:
         # 1.1 Train on Real Data
         # TODO what do I pass in as label of real_data?
         # gen_labels => real_label which is all 0. (minority class label)
-        prediction_real = self.discriminator(real_data)
-        error_real = self.loss(prediction_real, ones_target(N))
+        prediction_real = self.discriminator(real_data.to(self.device))
+        error_real = self.loss(prediction_real, ones_target(N).to(self.device))
 
         # TODO figure out whwy retain_graph is required here when other .backward() does not required it
         error_real.backward(retain_graph=True) # error here
 
         # 1.2 Train on Fake Data
-        prediction_fake = self.discriminator(fake_data)
+        prediction_fake = self.discriminator(fake_data.to(self.device))
         # Calculate error and backpropagate
-        error_fake = self.loss(prediction_fake, zeros_target(N))
+        error_fake = self.loss(prediction_fake, zeros_target(N).to(self.device))
         # print('in train discriminator error_fake')
         error_fake.backward()
 
@@ -246,7 +247,9 @@ class GAN:
             log.info('in init_gan')
 
         self.discriminator = DiscriminatorNet()
+        self.discriminator.to(self.device)
         self.generator = GeneratorNet()
+        self.generator.to(self.device)
         self.d_optimizer = optim.Adam(self.discriminator.parameters(),
                                       lr=0.0002)
         self.g_optimizer = optim.Adam(self.generator.parameters(), lr=0.0002)

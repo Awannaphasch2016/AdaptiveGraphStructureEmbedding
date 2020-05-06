@@ -1,4 +1,5 @@
 import os,sys,inspect
+import numpy as np
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0,parent_dir)
@@ -9,12 +10,13 @@ import os.path as osp
 import dgl
 from dgl.nn.pytorch import GraphConv
 import torch.nn.functional as F
-import torch_geometric.transforms as T
-from torch_geometric.datasets import Planetoid
-from torch_geometric.nn import GCNConv  # noqa
+# import torch_geometric.transforms as T
+# from torch_geometric.datasets import Planetoid
+# from torch_geometric.nn import GCNConv  # noqa
 
-from Examples.Libraries.PytorchGeometic.InMemoryDataset_class import *
-from arg_parser import args
+# from Examples.Libraries.PytorchGeometic.InMemoryDataset_class import *
+# from arg_parser import args
+import torch
 
 
 # f = r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_percent=0_noise=0.adjlist'
@@ -35,23 +37,23 @@ from arg_parser import args
 # f = r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=1_noise=0.adjlist'
 
 
-def convert_data(gcn, f):
-    if f.split('.')[-1] == 'adjlist':
-        # pass
-        # elif f.split('.')[-1] == 'embeddings':
-        # TODO here>> figure out why file that is pass into process is changed to byte file
-        G = process(f)
-        import torch
-        edge_index = []
-        x = []
-        for i, j in G.items():
-            for n in j:
-                edge_index.append([i, n])
-            x.append(i)
-        # TODO currently it cannot yet accept node features.
-        gcn.data.edge_index = torch.tensor(edge_index).transpose(1, 0)
-    else:
-        raise ValueError('no')
+# def convert_data(gcn, f):
+#     if f.split('.')[-1] == 'adjlist':
+#         # pass
+#         # elif f.split('.')[-1] == 'embeddings':
+#         # TODO here>> figure out why file that is pass into process is changed to byte file
+#         G = process(f)
+#         import torch
+#         edge_index = []
+#         x = []
+#         for i, j in G.items():
+#             for n in j:
+#                 edge_index.append([i, n])
+#             x.append(i)
+#         # TODO currently it cannot yet accept node features.
+#         gcn.data.edge_index = torch.tensor(edge_index).transpose(1, 0)
+#     else:
+#         raise ValueError('no')
 
 def get_gen_labels_for_min_and_maj():
     pass
@@ -126,12 +128,29 @@ class Net(torch.nn.Module):
                 raise ValueError('choose: run_all, get_conv1_emb, run_discriminator')
 
 class GCN:
-    def __init__(self,data):
+    def __init__(self,data, preserved_percent=1, device='cpu'):
         self.data = data
+        self.device = device
         # self.dataset = dataset
         self.model = None
         self.optimizer = None
+        self.preserved_percent = preserved_percent
         self.init_gcn()
+
+    def randomedge_sampler(self):
+        """
+        Randomly drop edge and preserve percent% edges.
+        """
+
+        nnz = self.data.edge_index.shape[1]
+        perm = np.random.permutation(nnz)
+        preserve_nnz = int(nnz * self.preserved_percent)
+        perm = perm[:preserve_nnz]
+        top = self.data.edge_index[0][perm].reshape(1,-1)
+        bottom = self.data.edge_index[1][perm].reshape(1,-1)
+        self.data.edge_index = torch.cat((top, bottom),dim=0)
+        # self.data.edge_index[0] = self.data.edge_index[0][perm]
+        # self.data.edge_index[1] = self.data.edge_index[1][perm]
 
     def get_dgl_graph(self):
         src = self.data.edge_index[0]
@@ -139,7 +158,7 @@ class GCN:
         import numpy as np
         u = np.concatenate([src, dst])
         v = np.concatenate([dst, src])
-        return dgl.DGLGraph((u,v))
+        return dgl.DGLGraph((u,v)).to(self.device)
 
     def loss(self, x, y):
         return F.nll_loss(x,y)
@@ -222,17 +241,17 @@ class GCN:
 
     def init_gcn(self):
 
-        if args.use_gdc:
-            gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
-                        normalization_out='col',
-                        diffusion_kwargs=dict(method='ppr', alpha=0.05),
-                        sparsification_kwargs=dict(method='topk', k=128,
-                                                   dim=0), exact=True)
-            self.data = gdc(self.data)
+        # if args.use_gdc:
+        #     gdc = T.GDC(self_loop_weight=1, normalization_in='sym',
+        #                 normalization_out='col',
+        #                 diffusion_kwargs=dict(method='ppr', alpha=0.05),
+        #                 sparsification_kwargs=dict(method='topk', k=128,
+        #                                            dim=0), exact=True)
+        #     self.data = gdc(self.data)
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        self.model, self.data = Net(self.data).to(device), self.data
+        self.model, self.data = Net(self.data).to(self.device), self.data
 
         # #=====================
         # #==torch parameters
@@ -254,42 +273,42 @@ class GCN:
         # return data, dataset, self.model, optimizer
 
 if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--use_gdc', action='store_true',
-                        help='Use GDC preprocessing.')
-    args = parser.parse_args()
-
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_percent=0_noise=0.adjlist',
-    #      r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0005.adjlist',
-    #      r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.001.adjlist',
-    #      r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.005.adjlist']
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_percent=0_noise=0.adjlist']
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0005.adjlist']
-    f = [
-        r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.001.adjlist']
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0015.adjlist']
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.002.adjlist']
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.005_noise=0.adjlist']
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.01_noise=0.adjlist']
-    # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.adjlist']
-
-    for i in f:
-
-        dataset = 'Cora'
-        path = osp.join(osp.dirname(osp.realpath(__file__)), '..', '..', 'Data',
-                        'External')
-        dataset = Planetoid(path, dataset, T.NormalizeFeatures())
-        data = dataset[0]
-
-        gcn = GCN(data, dataset )
-        # data, dataset, model, optimizer = init_gcn()
-
-        convert_data(gcn, i)
-        for i in range(100):
-            log = 'Epoch: {:03d}, Train: {:.4f}, Val: {:.4f}, Test: {:.4f}'
-            epoch, train_acc, best_val_acc, test_acc = gcn.run_gcn()
-            if i <= 10:
-                print(log.format(epoch, train_acc, best_val_acc, test_acc))
-            else:
-                exit()
+    pass
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--use_gdc', action='store_true',
+    #                     help='Use GDC preprocessing.')
+    # args = parser.parse_args()
+    #
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_percent=0_noise=0.adjlist',
+    # #      r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0005.adjlist',
+    # #      r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.001.adjlist',
+    # #      r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.005.adjlist']
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_percent=0_noise=0.adjlist']
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0005.adjlist']
+    # f = [
+    #     r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.001.adjlist']
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.0015.adjlist']
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.002.adjlist']
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.005_noise=0.adjlist']
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.01_noise=0.adjlist']
+    # # f = [r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Data\Preprocessed\Cora\cora_added_edges_same_class_nodes_percent=0.001_noise=0.adjlist']
+    #
+    # for i in f:
+    #
+    #     dataset = 'Cora'
+    #     path = osp.join(osp.dirname(osp.realpath(__file__)), '..', '..', 'Data',
+    #                     'External')
+    #     dataset = Planetoid(path, dataset, T.NormalizeFeatures())
+    #     data = dataset[0]
+    #
+    #     gcn = GCN(data, dataset )
+    #     # data, dataset, model, optimizer = init_gcn()
+    #
+    #     convert_data(gcn, i)
+    #     for i in range(100):
+    #         log = 'Epoch: {:03d}, Train: {:.4f}, Val: {:.4f}, Test: {:.4f}'
+    #         epoch, train_acc, best_val_acc, test_acc = gcn.run_gcn()
+    #         if i <= 10:
+    #             print(log.format(epoch, train_acc, best_val_acc, test_acc))
+    #         else:
+    #             exit()

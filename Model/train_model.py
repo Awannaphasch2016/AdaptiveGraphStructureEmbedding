@@ -33,27 +33,13 @@ log = Logging.Logger(name='log_for_train_model_file')
 # warnings.simplefilter("ignore", DeprecationWarning)
 # warnings.simplefilter("ignore", UserWarning)
 
-def randomedge_sampler(edge_index, percent, isLog=True):
-    """
-    Randomly drop edge and preserve percent% edges.
-    """
-    if isLog:
-        log.info('in randomedge_sampler..')
-
-    nnz = edge_index.shape[1]
-    perm = np.random.permutation(nnz)
-    preserve_nnz = int(nnz * percent)
-    perm = perm[:preserve_nnz]
-    edge_index[0] = edge_index[0][[perm]]
-    edge_index[1] = edge_index[1][[perm]]
-
-    return edge_index
-
 
 class MyNewModel:
     # def __init__(self, data, dataset, dataloader):
-    def __init__(self,dataset, k_fold_split=3, isLog=False, run_gcn_only=False):
+    def __init__(self,dataset, k_fold_split=3, isLog=False, run_gcn_only=False, device='cpu'):
         assert isinstance(dataset, str), ' please specify dataset '
+
+        self.device = device
         self.k_fold_split = k_fold_split
         self.time_stamp = time.strftime("%Y%m%d-%H%M%S")
 
@@ -80,6 +66,7 @@ class MyNewModel:
         self.num_batches = 1
         self.num_epochs = 200
 
+
         # # TODO torch dataset
         # min_class_ind = np.where(self.data.y == 0)
         # min_y_data = self.data.y[min_class_ind]
@@ -97,13 +84,13 @@ class MyNewModel:
         # =====================
         # ==for gan
         # =====================
-        self.gan = gan_model.GAN(self.data)
+        self.gan = gan_model.GAN(self.data, device=self.device)
         self.gan.init_gan()
 
         # =====================
         # ==for Gcn
         # ====================
-        self.gcn = gcn_model.GCN(self.data)
+        self.gcn = gcn_model.GCN(self.data, preserved_percent=args.preserved_edges_percent,  device=self.device)
 
     def prepare_gan_trainning_dataset(self, emb_after_conv1,
                                       trainning_selected_min_ind):
@@ -131,13 +118,14 @@ class MyNewModel:
             log.info('in run_gan_components_of_new_model...')
 
         if num_gan_epoch:
+            print(f'running gan {num_gan_epoch}')
             for n_batch, (real_batch, y) in enumerate(
                     self.min_class_data_loader_for_gan):
                 self.number_of_sample_per_batch = real_batch.size(0)
                 real_data = real_batch
 
                 fake_data = self.gan.generator(
-                    gan_model.noise(self.number_of_sample_per_batch))  # 10, 1433
+                    gan_model.noise(self.number_of_sample_per_batch).to(self.device))  # 10, 1433
 
                 d_error, d_pred_real, d_pred_fake = \
                     self.gan.train_discriminator(self.gan.d_optimizer,
@@ -145,10 +133,10 @@ class MyNewModel:
                                                  fake_data)
 
                 fake_data = self.gan.generator(gan_model.noise(
-                    self.number_of_sample_per_batch))
+                    self.number_of_sample_per_batch).to(self.device))
 
                 g_error = self.gan.train_generator(self.gan.g_optimizer,
-                                                   fake_data)
+                                                   fake_data.to(self.device))
                 if self.log:
                     log.info(f'running GCN epoch = {n_batch}')
 
@@ -169,6 +157,7 @@ class MyNewModel:
             'test_select_min_real_ind': self.data.test_select_min_real_ind,
             'test_select_maj_real_ind': self.data.test_select_maj_real_ind
         }
+        print('hihi')
 
         # for name, mask in self.data('trainning_select_minreal_majreal_ind',
         #                             'test_select_minfake_minreal_majreal_ind',
@@ -218,10 +207,8 @@ class MyNewModel:
         if self.log:
             log.info('in run_my_new_model_once..')
 
-        # convert edge_index to adj
-        # TODO does this have any connection to otehr part of the model? maybe I just forget to connect it to other components
-        self.data.edge_index = randomedge_sampler(self.data.edge_index, 1,
-                                                  isLog=self.log)
+
+        self.gcn.randomedge_sampler()
 
         y_pred_dict = {}
         y_score_dict = {}
@@ -234,7 +221,7 @@ class MyNewModel:
             self.gcn.model.train()
 
             emb_after_conv1 = self.gcn.model(self.gcn.get_dgl_graph(),
-                                             self.data.x,
+                                             self.data.x.to(self.device),
                                              get_conv1_emb=True)
 
             # =====================
@@ -251,7 +238,7 @@ class MyNewModel:
             # =====================
             fake_data = self.gan.generator(gan_model.noise(
                 self.model_input_data.trainning_selected_min_ind.shape[
-                    0]))  # this will be sent to discriminator 2 too
+                    0]).to(self.device))  # this will be sent to discriminator 2 too
 
             minreal_minfake_majreal_x = torch.cat(
                 (emb_after_conv1, fake_data), 0)
@@ -269,7 +256,7 @@ class MyNewModel:
 
             emb_after_conv2, logits = self.gcn.model(self.gcn.get_dgl_graph(),
                                                      emb_after_conv1,
-                                                     external_input=fake_data,
+                                                     external_input=fake_data.to(self.device),
                                                      run_discriminator=True)
             trainning_loss = self.gcn.loss_and_step(
                 logits[self.data.trainning_select_minfake_minreal_majreal_ind],
@@ -320,13 +307,13 @@ class MyNewModel:
             self.gcn.model.eval()
 
             logits = self.gcn.model(
-                self.gcn.get_dgl_graph(), self.data.x,
+                self.gcn.get_dgl_graph(), self.data.x.to(self.device),
                 run_all=True)
 
             test_loss = self.gcn.loss(
                 logits[self.data.test_selected_ind],
                 torch.tensor(self.data.y).type(torch.long)[
-                    self.data.test_selected_ind])
+                    self.data.test_selected_ind].to(self.device))
 
             # accs_dict, aucs_dict, y_pred_dict, y_score_dict, y_true_dict = self.collect_performance(
             #     logits, torch.tensor(self.data.y).type(torch.long), is_test=True)
@@ -638,9 +625,9 @@ class MyNewModel:
             self.aucs_hist_dict = {}
 
             # for epoch in range(self.num_epochs):
-            # for epoch in range(2):
+            for epoch in range(2):
             # for epoch in range(30):
-            for epoch in range(60):
+            # for epoch in range(60):
                 self.run_my_new_model_once(
                     epoch)
 
@@ -657,6 +644,10 @@ class MyNewModel:
 
 
         # TODO here>> avg over these total dict
+
+        #=====================
+        #==plotting and report performance for cross validation
+        #=====================
 
         self.collect_data_for_plotting()
 
@@ -708,7 +699,8 @@ class MyNewModel:
             print('=====train========')
             report_train_file = f'train_model_train_{self.time_stamp}'
             report_test_file = f'train_model_test_{self.time_stamp}'
-            train_report = report_performance(
+            # Todo fixed the current bug
+            train_performance = report_performance(
                 self.y_true_dict['trainning_select_minfake_minreal_majreal_ind'],
                 self.y_pred_dict['trainning_select_minfake_minreal_majreal_ind'],
                 self.y_score_dict['trainning_select_minfake_minreal_majreal_ind'],
@@ -719,8 +711,9 @@ class MyNewModel:
                 file_name=report_train_file,
                 return_value_for_cv=return_report_stat_for_cv
             )
+            train_report, train_cm = (None, None) if train_performance is None else train_performance
             print('=====test======')
-            test_report = report_performance(self.y_true_dict['test_select_minreal_majreal_ind'],
+            test_performance = report_performance(self.y_true_dict['test_select_minreal_majreal_ind'],
                                self.y_pred_dict['test_select_minreal_majreal_ind'],
                                self.y_score_dict['test_select_minreal_majreal_ind'],
                                labels=np.unique(self.data.y), verbose=display_report,
@@ -730,6 +723,7 @@ class MyNewModel:
                                file_name=report_test_file,
                                 return_value_for_cv = return_report_stat_for_cv)
 
+            test_report, test_cm = (None,None) if test_performance  is None else test_performance
         else:
             if plot_scan:
 
@@ -760,7 +754,8 @@ class MyNewModel:
             print('=====train========')
             report_train_file = f'run_gcn_train_{self.time_stamp}'
             report_test_file = f'run_gcn_test_{self.time_stamp}'
-            train_report = report_performance(
+
+            train_performance = report_performance(
                 self.y_true_dict['trainning_select_minreal_majreal_ind'],
                 self.y_pred_dict['trainning_select_minreal_majreal_ind'],
                 self.y_score_dict['trainning_select_minreal_majreal_ind'],
@@ -770,8 +765,9 @@ class MyNewModel:
                 save_path=f'C:\\Users\\Anak\\PycharmProjects\\AdaptiveGraphStructureEmbedding\\Output\\Report\\{self.dataset}\\train_model\\',
                 file_name=report_train_file,
                 return_value_for_cv=return_report_stat_for_cv)
+            train_report, train_cm = (None, None) if train_performance is None else train_performance
             print('=====test======')
-            test_report = report_performance(
+            test_performance = report_performance(
                 self.y_true_dict['test_select_minreal_majreal_ind'],
                                self.y_pred_dict['test_select_minreal_majreal_ind'],
                                self.y_score_dict['test_select_minreal_majreal_ind'],
@@ -781,8 +777,9 @@ class MyNewModel:
                                save_path=f'C:\\Users\\Anak\\PycharmProjects\\AdaptiveGraphStructureEmbedding\\Output\\Report\\{self.dataset}\\train_model\\',
                                file_name=report_test_file,
                                return_value_for_cv=return_report_stat_for_cv)
+            test_report, test_cm = (None, None) if test_performance is None else test_performance
 
-        return train_report, test_report
+        # return train_report, test_report
 
 
 def ratio_func(y, multiplier, minority_class):
@@ -812,13 +809,14 @@ if __name__ == '__main__':
     #
     # dataset = Planetoid(path, dataset, T.NormalizeFeatures())
     # data = dataset[0]
-
+    #
     np.random.seed(111)
     torch.manual_seed(111)
 
-    # dataset = 'cora'
-    dataset = 'citeseer'
+    dataset = 'cora'
+    # dataset = 'citeseer'
 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # todo here>> convert torch geometric data to torch data
-    my_new_model = MyNewModel(dataset, k_fold_split=args.k_fold_split , run_gcn_only=args.run_gcn_only)
+    my_new_model = MyNewModel(dataset, k_fold_split=args.k_fold_split , run_gcn_only=args.run_gcn_only, device=device)
     my_new_model.run_my_new_model()

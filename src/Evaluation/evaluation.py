@@ -161,12 +161,19 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
         visualize_roc_curve(fpr, tpr, roc_auc, save_path=save_path,
                             file_name=file_name, save_status=save_status)
 
-    return combine_report_and_auc(report_df, report_support_pred_class,
+    report_and_auc = combine_report_and_auc(report_df, report_support_pred_class,
                                   roc_auc_df, total_roc_auc_score, acc_per_class_df,
                                   verbose=verbose,
                                   return_value_for_cv=return_value_for_cv,
                                   save_file=save_file, save_status=save_status)
 
+    from sklearn.metrics import confusion_matrix
+    cm = confusion_matrix(y_true, y_pred)
+    if verbose:
+        print(cm)
+
+    if return_value_for_cv:
+        return report_and_auc, cm
 
 def combine_report_and_auc(report_df, report_support_pred_class,
                            roc_auc_df, total_roc_auc_score, acc_per_class_df, verbose,
