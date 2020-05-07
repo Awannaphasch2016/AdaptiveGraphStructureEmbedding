@@ -28,7 +28,6 @@ class PlotClass:
             plt.save_fig()
 
         '''
-
         assert isinstance(save_status, bool) , 'please specified save_plot attribute in PlotClass to be boolean'
 
         self.hist = {}
@@ -42,9 +41,10 @@ class PlotClass:
        for name, val in name_and_val_dict.items():
            self.collect_hist(name, val)
 
-    def plot_using_list_of_name(self, subplot_size,name_and_tuple_dict,save_file_name, title=None):
+    def plot_using_list_of_name(self, subplot_size,name_and_tuple_dict,save_file_name, title=None, save_path=None):
         assert isinstance(subplot_size, tuple), ''
         assert isinstance(name_and_tuple_dict, dict), ''
+        assert isinstance(save_path , str), ''
 
 
         self.set_subplots(subplot_size)
@@ -70,9 +70,10 @@ class PlotClass:
                     self.plot_each_hist(tuple_pos, name=name)
             else:
                     raise ValueError('tuple_pos canot be iterate over')
-        self.save_hist_with_pickel(name=f'{save_file_name}.pickle')
+        self.save_hist_with_pickel(path=save_path, name=f'{save_file_name}.pickle')
         self.save_fig(
-            name=f'{save_file_name}.png')
+            name=f'{save_file_name}.png',
+            path=save_path)
         self.plt.show()
 
     def collect_hist(self, name, val):
@@ -144,9 +145,11 @@ class PlotClass:
         self.plt.show()
 
     # def save_fig(self, path=r'Output/Plot/', name=None):
-    def save_hist_with_pickel(self ,path=f'C:\\Users\\Anak\\PycharmProjects\\AdaptiveGraphStructureEmbedding\\Output\\Plot\\', name=None, key=None):
+    def save_hist_with_pickel(self, name=None, key=None, path=None):
         '''name_of_file should reflect hist key that is dumped'''
         assert name is not None, "name must be specified to avoid ambiguity"
+        assert path is not None, "save_path must be specified to avoid ambiguity"
+
         save_path = path + name
         if self.save_status:
             print(f'saving pickle to {save_path} .. ')
@@ -159,9 +162,10 @@ class PlotClass:
                 pickle.dump(hist, p)
         else:
             print(f'save_status is false => pickle is not saved to {save_path}')
-    def save_fig(self, path=r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Output\Plot\\', name=None):
+    def save_fig(self, name=None, path=None):
         # permission denied
         assert name is not None, "name must be specified to avoid ambiguity"
+        assert path is not None, "path must be specified to avoid ambiguity"
         save_path = path + name
         if self.save_status:
             print(f'saving figure to {save_path} .. ')

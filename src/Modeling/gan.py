@@ -19,7 +19,7 @@ from Examples.Models.GAN.utils import Logger
 import Log.Logger as Logging
 from arg_parser import args
 
-log = Logging.Logger(name='log_for_train_model_file')
+log = Logging.Logger(name='log_for_{self.model_name}_file')
 
 ## global variables
 BATCHSIZE = 100

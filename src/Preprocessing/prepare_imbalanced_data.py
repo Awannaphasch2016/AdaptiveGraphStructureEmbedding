@@ -2,7 +2,9 @@ import numpy as np
 import torch
 
 class ModelInputData():
-    def __init__(self, dataset):
+    def __init__(self, dataset, downsample=True):
+
+        self.downsample = downsample
         if dataset == 'cora':
             self.data = self.preparing_cora_for_new_purposed_model()
             self.cora_prepare_ind_for_trainning_and_test_set()
@@ -38,7 +40,7 @@ class ModelInputData():
 
         data, _ = torch.load(
             r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\Examples\data\Cora\Cora\processed\data.pt')
-        data.y_before_relabel = data.y
+        data.y_before_relabel = np.array(data.y)
         new_y = self.relabel_minority_and_majority_classes(data)
         data.y = new_y
         data.num_classes = np.unique(data.y).shape[0]
@@ -101,7 +103,7 @@ class ModelInputData():
         self.label_count_dict = {i: 1 / self.data.y.shape[0] for (i, j) in
                                  zip(self.label_count[0], self.label_count[1])}
         self.p = np.array([self.label_count_dict[i] for i in
-                           self.data.y_before_relabel.numpy()])
+                           self.data.y_before_relabel])
         self.p /= self.p.sum()
         selected_data_ind = np.random.choice(np.arange(self.data.x.shape[0]),
                                              size=num_labeling, replace=False,
@@ -110,9 +112,11 @@ class ModelInputData():
         selected_data_ind_bool = np.zeros(self.data.x.shape[0])
         selected_data_ind_bool[selected_data_ind] = 1
 
+        # TODO is trainning_selected_ind what I am lookgin for ?  imbalance train_test split
         self.trainning_selected_ind = torch.tensor(selected_data_ind).type(torch.long)
         self.test_selected_ind = torch.tensor(
             np.where(selected_data_ind_bool == 0)[0]).type(torch.long)
+
 
         # # TODO
         # self.data.train_mask = selected_data_ind_bool
@@ -171,10 +175,15 @@ class ModelInputData():
                 np.random.choice(trainning_selected_min_ind, size=num_select,
                                  replace=False)).type(torch.long)
 
-            trainning_select_maj_real_ind = torch.tensor(
-                np.random.choice(trainning_selected_maj_ind,
-                                 size=num_select * 2,
-                                 replace=False)).type(torch.long)
+            if self.downsample:
+                # TODO change maj real to
+                trainning_select_maj_real_ind = torch.tensor(
+                    np.random.choice(trainning_selected_maj_ind,
+                                     size=num_select * 2,
+                                     replace=False)).type(torch.long)
+            else:
+                trainning_select_maj_real_ind = torch.tensor(trainning_selected_maj_ind).type(torch.long)
+
 
             test_select_maj_real_ind = torch.tensor(test_selected_maj_ind).type(
                 torch.long)

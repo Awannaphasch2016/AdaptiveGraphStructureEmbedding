@@ -245,20 +245,20 @@ if __name__ == '__main__':
     plot_class.plot_each_hist((2, 0), name='train_auc')
     plot_class.plot_each_hist((2, 0), name='test_auc')
     plot_class.save_hist_with_pickel(
-        name=f'from_run_gcn_key=train_loss_{time_stamp}.pickle', key='train_loss')
+        name=f'{time_stamp}_from_{model_name}key=train_loss.pickle', key='train_loss')
     plot_class.save_hist_with_pickel(
-        name=f'from_run_gcn_key=test_loss_{time_stamp}.pickle', key='test_loss')
-    plot_class.save_fig(name=f'from_run_gcn_{time_stamp}.png')
+        name=f'{time_stamp}_from_{model_name}key=test_loss.pickle', key='test_loss')
+    plot_class.save_fig(name=f'{time_stamp}_from_{model_name}.png')
     plot_class.save_hist_with_pickel(
-        name=f'from_run_gcn_key=train_acc_{time_stamp}.pickle', key='train_acc')
+        name=f'{time_stamp}_from_{model_name}key=train_acc.pickle', key='train_acc')
     plot_class.save_hist_with_pickel(
-        name=f'from_run_gcn_key=test_acc_{time_stamp}.pickle', key='test_acc')
-    plot_class.save_fig(name=f'from_run_gcn_{time_stamp}.png')
+        name=f'{time_stamp}_from_{model_name}key=test_acc.pickle', key='test_acc')
+    plot_class.save_fig(name=f'{time_stamp}from_{model_name}.png')
     plot_class.save_hist_with_pickel(
-        name=f'from_run_gcn_key=train_auc_{time_stamp}.pickle', key='train_auc')
+        name=f'{time_stamp}_from_{model_name}key=train_auc.pickle', key='train_auc')
     plot_class.save_hist_with_pickel(
-        name=f'from_run_gcn_key=test_auc_{time_stamp}.pickle', key='test_auc')
-    plot_class.save_fig(name=f'from_run_gcn_{time_stamp}.png')
+        name=f'{time_stamp}_from_{model_name}key=test_auc.pickle', key='test_auc')
+    plot_class.save_fig(name=f'{time_stamp}_from_{model_name}.png')
 
     print('=====train========')
     report_train_file = f'train_{time_stamp}'

@@ -101,7 +101,7 @@ class Net(torch.nn.Module):
 
             logits = F.log_softmax(h, dim=1)
 
-            return logits
+            return x_after_conv1,x_after_conv2, logits
         else:
             if get_conv1_emb:
                 h = self.conv1(g, x) # here what is input to conv1?
@@ -114,16 +114,19 @@ class Net(torch.nn.Module):
 
                 h = self.conv2(g, h)
                 x_after_conv2 = h
+                x_after_conv2_with_external_input = torch.cat((h, external_input), dim=0) if external_input is not None else h
+
                 h = torch.relu(h)
                 h = torch.nn.functional.dropout(h) # add  the followign argument training=True or False
 
                 # h = torch.cat((x, external_input), dim=0) if external_input is not None else h
                 h = torch.cat((h, external_input), dim=0) if external_input is not None else h
+                x_before_discriminator = h
                 h = self.discriminator(h)
 
                 logits = F.log_softmax(h, dim=1)
 
-                return x_after_conv2,  logits
+                return x_after_conv2,x_after_conv2_with_external_input, logits
             else:
                 raise ValueError('choose: run_all, get_conv1_emb, run_discriminator')
 

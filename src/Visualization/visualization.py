@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 
-
 def draw_graph_before_embedding(G, file_to_be_plotted=None, strategy=None, label=None, dataset = None):
     assert isinstance(file_to_be_plotted, str),  "is_embedding must be specified to avoid ambiguity"
     assert isinstance( label, str), ''

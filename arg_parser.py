@@ -31,7 +31,13 @@ parser.add_argument('--plot_roc', '-pr', action='store_true', help="")
 parser.add_argument('--plot_cv_roc', '-pcr', action='store_true', help="")
 parser.add_argument('--k_fold_split', '-kf',type=str, default=3, help='')
 parser.add_argument('--num_gan_epoch', '-ng',type=int, default=1, help='')
-parser.add_argument('--preserved_edges_percent','-pe', type=float, default=1, help='')
+parser.add_argument('--main_epoch', '-me',type=int, default=100, help='')
+parser.add_argument('--downsample','-ds', action='store_true', help="")
+parser.add_argument('--dataset', type=str, default='cora', help='')
+parser.add_argument('--preserved_edges_percent','-pep', type=float, default=1, help='')
+parser.add_argument('--plot_emb', '-pe',action='store_true', help="")
+parser.add_argument('--save_emb', '-se', action='store_true', help="")
+
 #-- utilities
 
 
