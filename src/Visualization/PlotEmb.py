@@ -13,7 +13,7 @@ class PlotEmb():
     def plot_all(self, save_path=None, title=None):
         assert isinstance(save_path, str)
         assert isinstance(title, str)
-        file = title + '.png'
+        file = save_path + title + '.png'
 
         for i, k in self.emb.items():
             # if i in ['test', 'train']:

@@ -34,19 +34,26 @@ from src.Evaluation import report_performance
 # warnings.simplefilter("ignore", UserWarning)
 
 
+
+
 class MyNewModel:
     # def __init__(self, data, dataset, dataloader):
     def __init__(self, dataset, main_epoch, num_gan_epoch, k_fold_split=3,
                  isLog=False, run_gcn_only=False, model_name=None,
-                 device='cpu', downsample=True):
-
-        self.plot_emb = PlotEmb(args.save_emb)
+                 device='cpu', downsample=True,
+                 preserved_edges_percent=None):
+        assert preserved_edges_percent is not None, "preserved_edges_percent must be specified to avoid ambiguity"
         assert model_name is not None, "model_name must be specified to avoid ambiguity"
+        assert isinstance(dataset, str), ' please specify dataset '
+
+        self.cur_dir = os.getcwd()
+        self.preserved_edges_percent = preserved_edges_percent
+        self.plot_emb = PlotEmb(args.save_emb)
         self.model_name = model_name
         self.num_gan_epoch = num_gan_epoch
         self.main_epoch = main_epoch
         self.is_downsampled = '' if not downsample else 'downsample'
-        assert isinstance(dataset, str), ' please specify dataset '
+        self.dataset = dataset
 
         self.device = device
         self.k_fold_split = k_fold_split
@@ -54,22 +61,20 @@ class MyNewModel:
 
         self.plot_class = PlotClass(save_status=args.save_plot)
 
-        # self.data = data
         self.log = isLog
         self.dataset = dataset
-        self.model_input_data = ModelInputData(self.dataset,
+        self.model_input_data = ModelInputData(self.cur_dir, self.dataset,
                                                downsample=downsample)
-        # self.model_input_data = ModelInputData(self.dataset)
         self.data = self.model_input_data.data
-        # self.data.x = self.data.x.to(self.device)
-        # self.data.y = self.data.y.to(self.device)
         self.init_my_new_model()
         self.run_gcn_only = run_gcn_only
         self.total_accs_dict = {}
         self.total_aucs_dict = {}
         self.total_loss = {}
 
-        self.save_path = f'C:\\Users\\Anak\\PycharmProjects\\AdaptiveGraphStructureEmbedding\\Output\\Report\\{self.dataset}\\{self.model_name}\\'
+        # self.save_path = f'C:\\Users\\Anak\\PycharmProjects\\AdaptiveGraphStructureEmbedding\\Output\\Report\\{self.dataset}\\{self.model_name}\\'
+        self.save_path = f'{self.cur_dir}\\..\\Output\\Report\\{self.dataset}\\{self.model_name}\\'
+
 
     def init_my_new_model(self):
         if self.log:
@@ -104,29 +109,108 @@ class MyNewModel:
         # ==for Gcn
         # ====================
         self.gcn = gcn_model.GCN(self.data,
-                                 preserved_percent=args.preserved_edges_percent,
+                                 preserved_percent=self.preserved_edges_percent,
                                  device=self.device)
 
-    def prepare_gan_trainning_dataset(self, emb_after_conv1,
-                                      trainning_selected_min_ind):
-        """There are only minority samples that is used as input"""
 
-        trainning_selected_min_y_gcn_emb = self.data.y[
-            trainning_selected_min_ind]
-        trainning_selected_min_x_gcn_emb = emb_after_conv1[
-            trainning_selected_min_ind]
+    def run_my_new_model(self, ):
 
-        self.min_class_cora_torch_dataset = CoraTorchDataset(
-            trainning_selected_min_x_gcn_emb,
-            trainning_selected_min_y_gcn_emb)
+        skf = StratifiedKFold(n_splits=self.k_fold_split)
 
-        self.batch_size = 10
-        self.min_class_data_loader_for_gan = torch.utils.data.DataLoader(
-            self.min_class_cora_torch_dataset, batch_size=self.batch_size,
-            shuffle=True)
-        # return torch.utils.data.DataLoader(
-        #     self.min_class_cora_torch_dataset, batch_size=self.batch_size,
-        #     shuffle=True)
+        self.gcn.randomedge_sampler()
+        original_y = self.data.y
+        for train, test in skf.split(np.arange(self.data.x.shape[0]),
+                                     original_y):
+
+            self.model_input_data.trainning_selected_ind = train
+            self.model_input_data.test_selected_ind = test
+
+            self.loss_per_epoch = {}
+            self.accs_hist_dict = {}
+            self.aucs_hist_dict = {}
+
+            for epoch in range(self.main_epoch):
+                name_and_val_dict = self.run_my_new_model_once(
+                    epoch)
+
+            #=====================
+            #==avg
+            #=====================
+
+            self.get_total_loss()
+            self.get_total_accs_and_aucs()
+
+            #=====================
+            #==plot  & report performance
+            #=====================
+
+            # self.plot_scan_and_loss(name_and_val_dict=None,
+            #                         plot_scan=False,
+            #                         plot_train_test=False,
+            #                         plot_roc=False,
+            #                         save_file=args.save_file,
+            #                         save_plot=args.save_plot,
+            #                         display_report=True)
+
+        # =====================
+        # ==plotting and report performance for cross validation
+        # =====================
+
+        self.collect_data_for_plotting()
+        self.plot_scan_and_loss(name_and_val_dict=name_and_val_dict,
+                                plot_scan=True,
+                                plot_train_test=True,
+                                plot_roc=True,
+                                save_file=args.save_cv_file,
+                                save_plot=args.save_cv_plot,
+                                display_report=True)
+
+    def run_my_new_model_once(self, epoch):
+        if self.log:
+            log.info('in run_my_new_model_once..')
+
+        self.prep_train_test_data_index(epoch)
+
+        name_and_val_dict = {}
+
+        if not self.run_gcn_only:
+            name_and_val_dict = self.run_gcn_gan_once( epoch, name_and_val_dict)
+        else:
+            name_and_val_dict = self.run_gcn_once( epoch, name_and_val_dict)
+
+        self.loss_per_epoch.setdefault('train_loss', []).append(
+            name_and_val_dict['train_loss'].cpu().detach().numpy())
+        self.loss_per_epoch.setdefault('test_loss', []).append(
+            name_and_val_dict['test_loss'].cpu().detach().numpy())
+
+
+        return name_and_val_dict
+
+
+    def run_gcn_once(self, epoch, name_and_val_dict):
+        logits, trainning_loss, test_loss, emb = self.train_gcn_once(name_and_val_dict)
+
+        name_and_val_dict['y_true']  = torch.tensor(self.data.y).type(torch.long)
+        name_and_val_dict['logits'] = logits
+        self.get_result_per_epoch(name_and_val_dict)
+
+        #=====================
+        #==result and plot
+        #=====================
+
+        name_and_val_dict = self.collect_var_in_name_and_val_dict(name_and_val_dict, **{'train_loss':trainning_loss,
+                                                                                        'test_loss':test_loss,
+                                                                                        'emb': emb}
+                                                                  )
+
+        self.display_and_plot_result(epoch, name_and_val_dict)
+
+        return name_and_val_dict
+
+    def run_gcn_gan_once(self, epoch, name_and_val_dict):
+        y_true, logits, trainning_loss, test_loss, emb = self.train_gcn_gan_once(epoch, name_and_val_dict)
+
+        return name_and_val_dict
 
     def run_gan_components_of_new_model(self, num_gan_epoch):
         if self.log:
@@ -155,6 +239,29 @@ class MyNewModel:
                                                    fake_data.to(self.device))
                 if self.log:
                     log.info(f'running GCN epoch = {n_batch}')
+
+
+    def prepare_gan_trainning_dataset(self, emb_after_conv1,
+                                      trainning_selected_min_ind):
+        """There are only minority samples that is used as input"""
+
+        trainning_selected_min_y_gcn_emb = self.data.y[
+            trainning_selected_min_ind]
+        trainning_selected_min_x_gcn_emb = emb_after_conv1[
+            trainning_selected_min_ind]
+
+        self.min_class_cora_torch_dataset = CoraTorchDataset(
+            trainning_selected_min_x_gcn_emb,
+            trainning_selected_min_y_gcn_emb)
+
+        self.batch_size = 10
+        self.min_class_data_loader_for_gan = torch.utils.data.DataLoader(
+            self.min_class_cora_torch_dataset, batch_size=self.batch_size,
+            shuffle=True)
+        # return torch.utils.data.DataLoader(
+        #     self.min_class_cora_torch_dataset, batch_size=self.batch_size,
+        #     shuffle=True)
+
 
     def collect_performance(self, logits, y_true):
 
@@ -202,384 +309,6 @@ class MyNewModel:
 
         return accs_dict, aucs_dict, y_pred_dict, y_score_dict, y_true_dict
 
-    def prepare_data_ind(self):
-
-        self.data.trainning_select_min_real_ind = self.model_input_data.trainning_select_min_real_ind
-        self.data.trainning_select_maj_real_ind = self.model_input_data.trainning_select_maj_real_ind
-        self.data.trainning_selected_ind = self.model_input_data.trainning_selected_ind
-
-        self.data.test_select_min_real_ind = self.model_input_data.test_select_min_real_ind
-        self.data.test_select_maj_real_ind = self.model_input_data.test_select_maj_real_ind
-        self.data.test_selected_ind = self.model_input_data.test_selected_ind
-
-        self.data.select_min_fake_ind = self.model_input_data.select_min_fake_ind
-
-        self.data.trainning_select_minreal_majreal_ind = self.model_input_data.trainning_select_minreal_majreal_ind
-        self.data.trainning_select_minfake_minreal_majreal_ind = self.model_input_data.trainning_select_minfake_minreal_majreal_ind
-        self.data.test_select_minreal_majreal_ind = self.model_input_data.test_select_minreal_majreal_ind
-        self.data.test_select_minfake_minreal_majreal_ind = self.model_input_data.test_select_minfake_minreal_majreal_ind
-
-    def run_my_new_model_once(self, epoch):
-        if self.log:
-            log.info('in run_my_new_model_once..')
-
-        self.gcn.randomedge_sampler()
-
-        y_pred_dict = {}
-        y_score_dict = {}
-        y_true_dict = {}
-        accs_dict = {}
-        aucs_dict = {}
-
-        if not self.run_gcn_only:
-
-            self.gcn.model.train()
-
-            train_emb_after_conv1 = self.gcn.model(self.gcn.get_dgl_graph(),
-                                             self.data.x.to(self.device),
-                                             get_conv1_emb=True)
-
-            # =====================
-            # ==gan dataset
-            # =====================
-            self.prepare_gan_trainning_dataset(
-                train_emb_after_conv1,
-                self.model_input_data.trainning_selected_min_ind)
-
-            self.run_gan_components_of_new_model(
-                num_gan_epoch=self.num_gan_epoch)
-
-            # =====================
-            # == fake_neg/true_neg/pos = 25%/25%/50%
-            # =====================
-            fake_data = self.gan.generator(gan_model.noise(
-                self.model_input_data.trainning_selected_min_ind.shape[
-                    0]).to(
-                self.device))  # this will be sent to discriminator 2 too
-
-            minreal_minfake_majreal_x = torch.cat(
-                (train_emb_after_conv1, fake_data), 0).to(self.device)
-            minreal_minfake_majreal_y = torch.cat(
-                (torch.tensor(self.data.y).type(torch.long),
-                 torch.zeros(
-                     fake_data.size(0)).type(
-                     torch.long)), 0).type(
-                torch.long).to(self.device)
-
-            if epoch == 0:
-                self.model_input_data.set_data(fake_data=fake_data)
-                self.model_input_data.set_train_test_data_index()
-            self.prepare_data_ind()
-
-            train_emb_after_conv2, train_emb_after_conv2_with_external_input ,logits = self.gcn.model(self.gcn.get_dgl_graph(),
-                                                     train_emb_after_conv1,
-                                                     external_input=fake_data.to(
-                                                         self.device),
-                                                     run_discriminator=True)
-            trainning_loss = self.gcn.loss_and_step(
-                logits[self.data.trainning_select_minfake_minreal_majreal_ind],
-                minreal_minfake_majreal_y[
-                    self.data.trainning_select_minfake_minreal_majreal_ind])
-
-            y_true = minreal_minfake_majreal_y
-
-            name_and_mask_dict = {
-                'trainning_select_minfake_minreal_majreal_ind': self.data.trainning_select_minfake_minreal_majreal_ind,
-                'trainning_select_min_real_ind': self.data.trainning_select_min_real_ind,
-                'trainning_select_maj_real_ind': self.data.trainning_select_maj_real_ind,
-                'select_min_fake_ind': self.data.select_min_fake_ind,
-            }
-
-            for name, mask in name_and_mask_dict.items():
-
-                # for name, mask in self.data(
-                #         'trainning_select_minfake_minreal_majreal_ind',
-                #         'trainning_select_min_real_ind',
-                #         'trainning_select_maj_real_ind',
-                #         'select_min_fake_ind'
-                #         ):
-
-                pred = logits[mask].max(1)[1]
-                y_true_mask = y_true[mask]
-                y_score = logits[mask].cpu().detach().numpy()
-
-                y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
-                y_score_dict.setdefault(name, y_score)
-                y_true_dict.setdefault(name, y_true_mask.cpu().detach().numpy())
-
-                acc = pred.eq(y_true_mask).sum().item() / mask.shape[0]
-                accs_dict.setdefault(name, acc)
-                self.accs_hist_dict.setdefault(name, []).append(acc)
-
-                if name in ['trainning_select_minfake_minreal_majreal_ind',
-                            'test_select_minreal_majreal_ind']:
-                    auc = get_total_roc_auc_score(
-                        y_true_mask.cpu().detach().numpy(), y_score)
-                    aucs_dict.setdefault(name, auc)
-                    # accs_hist_dict.setdefault(name, []).append(acc)
-                    self.aucs_hist_dict.setdefault(name, []).append(auc)
-
-            # =====================
-            # == gcn test
-            # =====================
-            self.gcn.model.eval()
-
-            test_emb_after_conv1, test_emb_after_conv2, logits = self.gcn.model(
-                self.gcn.get_dgl_graph(), self.data.x.to(self.device),
-                run_all=True)
-
-            test_loss = self.gcn.loss(
-                logits[self.data.test_selected_ind],
-                torch.tensor(self.data.y).type(torch.long)[
-                    self.data.test_selected_ind].to(self.device))
-
-            # accs_dict, aucs_dict, y_pred_dict, y_score_dict, y_true_dict = self.collect_performance(
-            #     logits, torch.tensor(self.data.y).type(torch.long), is_test=True)
-
-            name_and_mask_dict = {
-                'test_select_minreal_majreal_ind': self.data.test_select_minreal_majreal_ind,
-                'test_select_min_real_ind': self.data.test_select_min_real_ind,
-                'test_select_maj_real_ind': self.data.test_select_maj_real_ind,
-            }
-
-            for name, mask in name_and_mask_dict.items():
-
-                # for name, mask in self.data(
-                #         'test_select_minreal_majreal_ind',
-                #         'test_select_min_real_ind',
-                #         'test_select_maj_real_ind',
-                #                             ):
-
-                pred = logits[mask].max(1)[1]
-                y_true_mask = y_true[mask]
-                y_score = logits[mask].cpu().detach().numpy()
-
-                y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
-                y_score_dict.setdefault(name, y_score)
-                y_true_dict.setdefault(name, y_true_mask)
-
-                acc = pred.eq(y_true_mask).sum().item() / mask.shape[0]
-                accs_dict.setdefault(name, acc)
-                self.accs_hist_dict.setdefault(name, []).append(acc)
-
-                if name in ['trainning_select_minreal_majreal_ind',
-                            'test_select_minreal_majreal_ind']:
-                    auc = get_total_roc_auc_score(y_true_mask, y_score)
-                    aucs_dict.setdefault(name, auc)
-                    # accs_hist_dict.setdefault(name, []).append(acc)
-                    self.aucs_hist_dict.setdefault(name, []).append(auc)
-
-        else:
-
-            if epoch == 0:
-                self.model_input_data.set_data()
-                self.model_input_data.set_train_test_data_index()
-
-            self.data.trainning_select_min_real_ind = self.model_input_data.trainning_select_min_real_ind
-            self.data.trainning_select_maj_real_ind = self.model_input_data.trainning_select_maj_real_ind
-            self.data.trainning_selected_ind = self.model_input_data.trainning_selected_ind
-
-            self.data.test_select_min_real_ind = self.model_input_data.test_select_min_real_ind
-            self.data.test_select_maj_real_ind = self.model_input_data.test_select_maj_real_ind
-            self.data.test_selected_ind = self.model_input_data.test_selected_ind
-
-            self.data.trainning_select_minreal_majreal_ind = self.model_input_data.trainning_select_minreal_majreal_ind
-            self.data.test_select_minreal_majreal_ind = self.model_input_data.test_select_minreal_majreal_ind
-
-            self.gcn.model.train()
-
-            train_emb_after_conv1, train_emb_after_conv2, logits = self.gcn.model(self.gcn.get_dgl_graph(),
-                                    self.data.x,
-                                    run_all=True)
-
-            trainning_loss = self.gcn.loss_and_step(
-                logits[self.model_input_data.trainning_selected_ind],
-                torch.tensor(self.data.y).type(torch.long)[
-                    self.model_input_data.trainning_selected_ind])
-
-            # =====================
-            # == gcn test
-            # =====================
-            self.gcn.model.eval()
-
-            test_emb_after_conv1, test_emb_after_conv2, logits = self.gcn.model(
-                self.gcn.get_dgl_graph(), self.data.x,
-                run_all=True)
-
-            test_loss = self.gcn.loss_and_step(
-                logits[self.model_input_data.test_selected_ind],
-                torch.tensor(self.data.y).type(torch.long)[
-                    self.model_input_data.test_selected_ind])
-            # accs_dict, aucs_dict, y_pred_dict, y_score_dict, y_true_dict = self.collect_performance(
-            #     logits, self.data.y)
-
-            y_true = torch.tensor(self.data.y).type(torch.long)
-
-            name_and_mask_dict = {
-                'trainning_select_minreal_majreal_ind': self.data.trainning_select_minreal_majreal_ind,
-                'test_select_minreal_majreal_ind': self.data.test_select_minreal_majreal_ind,
-                'trainning_select_min_real_ind': self.data.trainning_select_min_real_ind,
-                'trainning_select_maj_real_ind': self.data.trainning_select_maj_real_ind,
-                'test_select_min_real_ind': self.data.test_select_min_real_ind,
-                'test_select_maj_real_ind': self.data.test_select_maj_real_ind
-            }
-
-            # for name, mask in self.data('trainning_select_minreal_majreal_ind',
-            #                             'test_select_minreal_majreal_ind',
-            #                             'trainning_select_min_real_ind',
-            #                             'trainning_select_maj_real_ind',
-            #                             'test_select_min_real_ind',
-            #                             'test_select_maj_real_ind',
-            #                             ):
-
-            for name, mask in name_and_mask_dict.items():
-
-                pred = logits[mask].max(1)[1]
-                y_true_mask = y_true[mask]
-                y_score = logits[mask].cpu().detach().numpy()
-
-                y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
-                y_score_dict.setdefault(name, y_score)
-                y_true_dict.setdefault(name, y_true_mask)
-
-                acc = pred.eq(y_true_mask).sum().item() / mask.shape[0]
-                accs_dict.setdefault(name, acc)
-                self.accs_hist_dict.setdefault(name, []).append(acc)
-
-                if name in ['trainning_select_minreal_majreal_ind',
-                            'test_select_minreal_majreal_ind']:
-                    auc = get_total_roc_auc_score(y_true_mask, y_score)
-                    aucs_dict.setdefault(name, auc)
-                    self.aucs_hist_dict.setdefault(name, []).append(auc)
-
-        if not self.run_gcn_only:
-            print(f"""
-                Epoch: {epoch:03d},
-                Trainning: (loss: {trainning_loss:.4f}, min_real: acc={accs_dict["trainning_select_min_real_ind"]:.4f} maj: acc={accs_dict["trainning_select_maj_real_ind"]:.4f})  min_fake: acc={accs_dict["select_min_fake_ind"]:.4f}
-                Test     : (loss: {test_loss:.4f} min_real = acc={accs_dict["test_select_min_real_ind"]:.4f} maj: acc={accs_dict["test_select_maj_real_ind"]:.4f}) 
-
-                Train: (acc={accs_dict["trainning_select_minfake_minreal_majreal_ind"]:.4f}, auc={aucs_dict["trainning_select_minfake_minreal_majreal_ind"]: .4f}, loss={trainning_loss:.4f})
-                Test: ({accs_dict["test_select_minreal_majreal_ind"]:.4f}, auc={aucs_dict["test_select_minreal_majreal_ind"]:4f}, loss={test_loss:.4f})
-            """)
-
-            name_and_val_dict = {'train_loss': trainning_loss,
-                                 'train_acc': accs_dict[
-                                     'trainning_select_minfake_minreal_majreal_ind'],
-                                 'trainning_select_min_real_ind': accs_dict[
-                                     'trainning_select_min_real_ind'],
-                                 'trainning_select_maj_real_ind': accs_dict[
-                                     'trainning_select_maj_real_ind'],
-                                 'train_auc': aucs_dict[
-                                     'trainning_select_minfake_minreal_majreal_ind'],
-                                 'test_loss': test_loss,
-                                 'test_acc': accs_dict[
-                                     'test_select_minreal_majreal_ind'],
-                                 'test_auc': aucs_dict[
-                                     'test_select_minreal_majreal_ind'],
-                                 'test_select_min_real_ind': accs_dict[
-                                     'test_select_min_real_ind'],
-                                 'test_select_maj_real_ind': accs_dict[
-                                     'test_select_maj_real_ind'],
-                                 'select_min_fake_ind': accs_dict[
-                                     'select_min_fake_ind']
-                                 }
-            self.plot_class.collect_hist_using_list_of_name(
-                name_and_val_dict=name_and_val_dict)
-            emb = train_emb_after_conv2_with_external_input
-
-
-        else:
-            print(f"""
-            Epoch: {epoch:03d},
-            Trainning: (loss: {trainning_loss:.4f}, min_real: acc={accs_dict["trainning_select_min_real_ind"]:.4f} maj: acc={accs_dict["trainning_select_maj_real_ind"]:.4f})
-            Test     : (loss: {test_loss:.4f} min_real: acc={accs_dict["test_select_min_real_ind"]:.4f} maj: acc={accs_dict["test_select_maj_real_ind"]:.4f}) 
-
-            Train: (acc={accs_dict["trainning_select_minreal_majreal_ind"]:.4f}, auc={aucs_dict["trainning_select_minreal_majreal_ind"]: .4f}, loss={trainning_loss:.4f})
-            Test: ({accs_dict["test_select_minreal_majreal_ind"]:.4f}, auc={aucs_dict["test_select_minreal_majreal_ind"]:4f}, loss={test_loss:.4f})
-        """)
-
-            name_and_val_dict = {'train_loss': trainning_loss,
-                                 'train_acc': accs_dict[
-                                     'trainning_select_minreal_majreal_ind'],
-                                 'trainning_select_min_real_ind': accs_dict[
-                                     'trainning_select_min_real_ind'],
-                                 'trainning_select_maj_real_ind': accs_dict[
-                                     'trainning_select_maj_real_ind'],
-                                 'train_auc': aucs_dict[
-                                     'trainning_select_minreal_majreal_ind'],
-                                 'test_loss': test_loss,
-                                 'test_acc': accs_dict[
-                                     'test_select_minreal_majreal_ind'],
-                                 'test_auc': aucs_dict[
-                                     'test_select_minreal_majreal_ind'],
-                                 'test_select_min_real_ind': accs_dict[
-                                     'test_select_min_real_ind'],
-                                 'test_select_maj_real_ind': accs_dict[
-                                     'test_select_maj_real_ind'],
-                                 }
-
-            self.plot_class.collect_hist_using_list_of_name(
-                name_and_val_dict=name_and_val_dict)
-            emb = train_emb_after_conv2
-
-
-
-        self.loss_per_epoch.setdefault('trainning_loss', []).append(
-            trainning_loss.cpu().detach().numpy())
-        self.loss_per_epoch.setdefault('test_loss', []).append(
-            test_loss.cpu().detach().numpy())
-
-        self.y_true_dict = y_true_dict
-        self.y_pred_dict = y_pred_dict
-        self.y_score_dict = y_score_dict
-        self.accs_dict = y_score_dict
-        self.aucs_dict = aucs_dict
-
-        return emb
-
-
-
-        # return train_emb_after_conv1, train_emb_after_conv2
-
-    def apply_tsne_on_emb(self, emb, run_gcn_only=None):
-        assert run_gcn_only is not None, "run_gcn_only must be specified to avoid ambiguity"
-        emb_dict = {}
-
-        from sklearn.manifold import TSNE
-
-        emb_2d = TSNE(n_components=2).fit_transform(emb)
-        print(emb_2d.shape)
-        # output (4, 2)
-        if not run_gcn_only:
-            emb_dict.setdefault('test', emb_2d[self.data.test_selected_ind])
-            emb_dict.setdefault('train', emb_2d[self.data.trainning_selected_ind])
-            emb_dict.setdefault('min_real', np.concatenate((emb_2d[
-                                                           self.data.trainning_select_min_real_ind.cpu().detach().numpy()],
-                                                       emb_2d[
-                                                           self.data.test_select_min_real_ind.cpu().detach().numpy()]),
-                                                      axis=0))
-            emb_dict.setdefault('min_fake', emb_2d[self.data.select_min_fake_ind])
-            emb_dict.setdefault('maj', np.concatenate((emb_2d[
-                                                      self.data.trainning_select_maj_real_ind.cpu().detach().numpy()],
-                                                  emb_2d[
-                                                      self.data.test_select_maj_real_ind.cpu().detach().numpy()]),
-                                                 0))
-        else:
-            emb_dict.setdefault('test', emb_2d[self.data.test_selected_ind])
-            emb_dict.setdefault('train', emb_2d[self.data.trainning_selected_ind])
-            emb_dict.setdefault('min_real', np.concatenate((emb_2d[
-                                                                self.data.trainning_select_min_real_ind.cpu().detach().numpy()],
-                                                            emb_2d[
-                                                                self.data.test_select_min_real_ind.cpu().detach().numpy()]),
-                                                           axis=0))
-            emb_dict.setdefault('maj', np.concatenate((emb_2d[
-                                                           self.data.trainning_select_maj_real_ind.cpu().detach().numpy()],
-                                                       emb_2d[
-                                                           self.data.test_select_maj_real_ind.cpu().detach().numpy()]),
-                                                      0))
-
-        return emb_dict
-
     def collect_data_for_plotting(self):
         def avg(x):
             return x / self.k_fold_split
@@ -619,7 +348,7 @@ class MyNewModel:
             """)
 
             self.plot_class.hist = {}
-            name_and_val_dict = {'train_loss': avg_trainning_loss,
+            dict_for_plot = {'train_loss': avg_trainning_loss,
                                  'train_acc': avg_trainning_acc,
                                  'trainning_select_min_real_ind': avg_trainning_minreal_acc,
                                  'trainning_select_maj_real_ind': avg_trainning_majreal_acc,
@@ -633,7 +362,7 @@ class MyNewModel:
 
                                  }
             self.plot_class.collect_hist_using_list_of_name(
-                name_and_val_dict=name_and_val_dict)
+                dict_for_plot=dict_for_plot)
 
         else:
 
@@ -667,7 +396,7 @@ class MyNewModel:
             """)
 
             self.plot_class.hist = {}
-            name_and_val_dict = {'train_loss': avg_trainning_loss,
+            dict_for_plot = {'train_loss': avg_trainning_loss,
                                  'train_acc': avg_trainning_acc,
                                  'trainning_select_min_real_ind': avg_trainning_minreal_acc,
                                  'trainning_select_maj_real_ind': avg_trainning_majreal_acc,
@@ -679,12 +408,26 @@ class MyNewModel:
                                  'test_select_maj_real_ind': avg_test_majreal_acc,
                                  }
             self.plot_class.collect_hist_using_list_of_name(
-                name_and_val_dict=name_and_val_dict)
+                dict_for_plot=dict_for_plot)
+
+    def get_result_per_epoch(self, name_and_val_dict, is_train=None):
+
+        if not self.run_gcn_only:
+            assert isinstance(is_train, bool), ''
+            y_true_dict, y_pred_dict, y_score_dict, y_score_dict, accs_dict, aucs_dict = self.get_result_of_gcn_gan(name_and_val_dict, is_train)
+        else:
+            y_true_dict, y_pred_dict, y_score_dict, y_score_dict, accs_dict, aucs_dict = self.get_result_of_gcn(name_and_val_dict)
+
+        name_and_val_dict.setdefault('accs_dict', {}).update(accs_dict)
+        name_and_val_dict.setdefault('aucs_dict', {}).update(aucs_dict)
+        name_and_val_dict.setdefault('y_true_dict', {}).update(y_true_dict)
+        name_and_val_dict.setdefault('y_pred_dict', {}).update(y_pred_dict)
+        name_and_val_dict.setdefault('y_score_dict', {}).update(y_score_dict)
 
     def get_total_loss(self):
         if 'trainning_loss' not in self.total_loss:
             self.total_loss['trainning_loss'] = np.array(
-                self.loss_per_epoch['trainning_loss'])
+                self.loss_per_epoch['train_loss'])
         else:
             self.total_loss['trainning_loss'] += self.loss_per_epoch[
                 'test_loss']
@@ -710,73 +453,129 @@ class MyNewModel:
             else:
                 self.total_aucs_dict[i] += x
 
-    def run_my_new_model(self, ):
+    def train_gcn_once(self, name_and_val_dict):
 
-        # self.model_input_data.cora_prepare_ind_for_trainning_and_test_set()
-        # self.model_input_data.citeseer_prepare_ind_for_trainning_and_test_set()
-        # TODO cross validation
+        self.gcn.model.train()
 
-        skf = StratifiedKFold(n_splits=self.k_fold_split)
-
-        original_y = self.data.y
-        for train, test in skf.split(np.arange(self.data.x.shape[0]),
-                                     original_y):
-            self.model_input_data.trainning_selected_ind = train
-            self.model_input_data.test_selected_ind = test
-
-            self.loss_per_epoch = {}
-            self.accs_hist_dict = {}
-            self.aucs_hist_dict = {}
-
-            # for epoch in range(self.num_epochs):
-            # for epoch in range(2):
-            # for epoch in range(30):
-            # for epoch in range(60):
-            for epoch in range(self.main_epoch):
-                emb = self.run_my_new_model_once(
-                    epoch)
-
-            # emb_dict = self.apply_tsne_on_emb(
-            #     train_emb_after_conv2.cpu().detach().numpy(), run_gcn_only=self.run_gcn_only)
-            # for i, j in emb_dict.items():
-            #     self.plot_emb.collect_emb(i, j)
-
-            #=====================
-            #==avg
-            #=====================
-
-            self.get_total_loss()
-            self.get_total_accs_and_aucs()
-
-            #=====================
-            #==plot  & report performance
-            #=====================
-
-            self.plot_scan_and_loss(emb=None,
-                                    plot_scan=False,
-                                    plot_train_test=False,
-                                    plot_roc=False,
-                                    save_file=args.save_file,
-                                    save_plot=args.save_plot,
-                                    display_report=True)
-
-        # TODO here>> avg over these total dict
+        train_emb_after_conv1, train_emb_after_conv2, logits = self.gcn.model(
+            self.gcn.get_dgl_graph(),
+            self.data.x,
+            run_all=True)
+        trainning_loss = self.gcn.loss_and_step(
+            logits[self.model_input_data.trainning_selected_ind],
+            torch.tensor(self.data.y).type(torch.long)[
+                self.model_input_data.trainning_selected_ind])
 
         # =====================
-        # ==plotting and report performance for cross validation
+        # == gcn test
         # =====================
+        self.gcn.model.eval()
 
-        self.collect_data_for_plotting()
+        test_emb_after_conv1, test_emb_after_conv2, logits = self.gcn.model(
+            self.gcn.get_dgl_graph(), self.data.x,
+            run_all=True)
 
-        self.plot_scan_and_loss(emb=emb,
-                                plot_scan=True,
-                                plot_train_test=True,
-                                plot_roc=True,
-                                save_file=args.save_cv_file,
-                                save_plot=args.save_cv_plot,
-                                display_report=True)
+        test_loss = self.gcn.loss_and_step(
+            logits[self.model_input_data.test_selected_ind],
+            torch.tensor(self.data.y).type(torch.long)[
+                self.model_input_data.test_selected_ind])
 
-    def plot_scan_and_loss(self, emb=None,
+        self.collect_var_in_name_and_val_dict(name_and_val_dict, **{'trainning_loss': trainning_loss,
+                                                                    'test_loss': test_loss})
+
+
+        return logits, trainning_loss, test_loss, train_emb_after_conv2
+
+    def train_gcn_gan_once(self, epoch, name_and_val_dict):
+        # self.apply_trianning()
+        self.gcn.model.train()
+
+        train_emb_after_conv1 = self.gcn.model(self.gcn.get_dgl_graph(),
+                                               self.data.x.to(self.device),
+                                               get_conv1_emb=True)
+
+        # =====================
+        # ==gan dataset
+        # =====================
+        self.prepare_gan_trainning_dataset(
+            train_emb_after_conv1,
+            self.model_input_data.trainning_selected_min_ind)
+
+        self.run_gan_components_of_new_model(
+            num_gan_epoch=self.num_gan_epoch)
+
+        # =====================
+        # == fake_neg/true_neg/pos = 25%/25%/50%
+        # =====================
+        fake_data = self.gan.generator(gan_model.noise(
+            self.model_input_data.trainning_selected_min_ind.shape[
+                0]).to(
+            self.device))  # this will be sent to discriminator 2 too
+
+        minreal_minfake_majreal_x = torch.cat(
+            (train_emb_after_conv1, fake_data), 0).to(self.device)
+        minreal_minfake_majreal_y = torch.cat(
+            (torch.tensor(self.data.y).type(torch.long),
+             torch.zeros(
+                 fake_data.size(0)).type(
+                 torch.long)), 0).type(
+            torch.long).to(self.device)
+
+        if epoch == 0:
+            self.model_input_data.set_data(fake_data=fake_data)
+            self.model_input_data.set_train_test_data_index()
+        self.prepare_data_ind()
+
+        train_emb_after_conv2, train_emb_after_conv2_with_external_input, logits = self.gcn.model(
+            self.gcn.get_dgl_graph(),
+            train_emb_after_conv1,
+            external_input=fake_data.to(
+                self.device),
+            run_discriminator=True)
+        trainning_loss = self.gcn.loss_and_step(
+            logits[self.data.trainning_select_minfake_minreal_majreal_ind],
+            minreal_minfake_majreal_y[
+                self.data.trainning_select_minfake_minreal_majreal_ind])
+
+        y_true = minreal_minfake_majreal_y
+
+        name_and_val_dict['logits'] = logits
+        name_and_val_dict['y_true'] = y_true
+        self.get_result_per_epoch(name_and_val_dict, is_train=True)
+
+
+        # =====================
+        # == gcn test
+        # =====================
+        self.gcn.model.eval()
+
+        test_emb_after_conv1, test_emb_after_conv2, logits = self.gcn.model(
+            self.gcn.get_dgl_graph(), self.data.x.to(self.device),
+            run_all=True)
+
+        test_loss = self.gcn.loss(
+            logits[self.data.test_selected_ind],
+            torch.tensor(self.data.y).type(torch.long)[
+                self.data.test_selected_ind].to(self.device))
+
+
+
+        name_and_val_dict['y_true']  = y_true.type(torch.long)
+        name_and_val_dict['logits'] = logits
+        self.get_result_per_epoch(name_and_val_dict, is_train=False)
+
+        #=====================
+        #==Result and performance
+        #=====================
+        name_and_val_dict = self.collect_var_in_name_and_val_dict(name_and_val_dict,**{'train_loss': trainning_loss,
+                                                                                       'test_loss': test_loss,
+                                                                                       'emb': train_emb_after_conv2_with_external_input}
+                                                                  )
+
+        self.display_and_plot_result(epoch, name_and_val_dict)
+        return y_true, logits, trainning_loss, test_loss, train_emb_after_conv2
+
+    def plot_scan_and_loss(self, name_and_val_dict=None,
                            plot_scan=False,
                            plot_train_test=False,
                            plot_roc=False,
@@ -786,24 +585,64 @@ class MyNewModel:
                            return_report_stat_for_cv=False):
 
         """when save_plot is True, it only svae plot that its status is True"""
+
         self.plot_class.save_status = save_plot
+
+        if args.run_gcn_only:
+            model_name = 'run_gcn'
+        elif args.run_gcn_gan:
+            model_name = 'train_model'
+
+        naming_convention_dict = {
+            'dataset': self.dataset,
+            'model_name': self.model_name,
+            'is_downsampled': self.is_downsampled,
+            'main_epoch': self.main_epoch,
+            'num_gan_epoch': self.num_gan_epoch,
+            'time_stamp': self.time_stamp,
+            'preserved_edges_percent': self.preserved_edges_percent
+        }
+        # save_path = get_folder(naming_convention_dict)
+        # file_name = create_file_naming_convension(naming_convention_dict)
 
         #=====================
         #==plot emb
         #=====================
+        # title = create_file_naming_convension(naming_convention_dict)
+        # file = f'{self.time_stamp}_{self.model_name}_emb_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
+        # title = f'{self.time_stamp}_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
         save_path = self.save_path
-        title = f'{self.time_stamp}_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
+        title = create_file_naming_convension(naming_convention_dict, title=True)
+        emb_file_name = create_file_naming_convension(naming_convention_dict, emb=True)
+        scan_file_name = create_file_naming_convension(naming_convention_dict,
+                                                       scan=True)
+        train_test_name = create_file_naming_convension(naming_convention_dict,
+                                                        train_test=True)
+        report_train_file = create_file_naming_convension(
+            naming_convention_dict,
+            report=True, is_train=True)
+        report_test_file = create_file_naming_convension(naming_convention_dict,
+                                                         report=True,
+                                                         is_train=False)
+        print(save_path)
+        print(title)
+        print(emb_file_name)
+        print(scan_file_name)
+        print(train_test_name)
+        print(report_train_file)
+        print(report_test_file)
 
-        if emb is not None:
+        if name_and_val_dict['emb'] is not None:
             emb_dict = self.apply_tsne_on_emb(
-                emb.cpu().detach().numpy(), run_gcn_only=self.run_gcn_only)
+                name_and_val_dict['emb'].cpu().detach().numpy(), run_gcn_only=self.run_gcn_only)
             for i, j in emb_dict.items():
                 self.plot_emb.collect_emb(i, j)
-            self.plot_emb.plot_all(save_path=save_path, title=title)
+            self.plot_emb.plot_all(save_path=save_path, title=emb_file_name)
 
         #=====================
         #==plot other thing + report performance
         #=====================
+
 
         if not self.run_gcn_only:
 
@@ -816,14 +655,14 @@ class MyNewModel:
                                 'test_select_min_real_ind': (2, 0),
                                 'test_select_maj_real_ind': (2, 0),
                                 }
-                file_name = f'{self.time_stamp}_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}_scan = True'
                 self.plot_class.plot_using_list_of_name(subplot_size=(3, 1),
                                                         name_and_tuple_dict=list_of_name,
-                                                        save_file_name=file_name,
+                                                        save_file_name=scan_file_name,
                                                         title= title,
                                                         save_path=save_path)
 
             if plot_train_test:
+
                 list_of_name = {'train_loss': (0, 0),
                                 'train_acc': (1, 0),
                                 'train_auc': (2, 0),
@@ -832,23 +671,27 @@ class MyNewModel:
                                 'test_auc': (2, 0),
                                 }
 
-                file_name = f'{self.time_stamp}_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
                 self.plot_class.plot_using_list_of_name(subplot_size=(3, 1),
                                                         name_and_tuple_dict=list_of_name,
-                                                        save_file_name=file_name,
+                                                        save_file_name=train_test_name,
                                                         title=title,
                                                         save_path=save_path)
 
             print('=====train========')
-            report_train_file = f'{self.time_stamp}_{self.model_name}_train_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
-            report_test_file = f'{self.time_stamp}_{self.model_name}_test_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
+            # report_train_file = create_file_naming_convension(naming_convention_dict,
+            #                                           report=True, is_train=True)
+            # report_test_file = create_file_naming_convension(naming_convention_dict,
+            #                                           report=True, is_train=False)
+
+            # report_train_file = f'{self.time_stamp}_{self.model_name}_train_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
+            # report_test_file = f'{self.time_stamp}_{self.model_name}_test_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
             # Todo fixed the current bug
             train_performance = report_performance(
-                self.y_true_dict[
+                name_and_val_dict['y_true_dict'][
                     'trainning_select_minfake_minreal_majreal_ind'],
-                self.y_pred_dict[
+                name_and_val_dict['y_pred_dict'][
                     'trainning_select_minfake_minreal_majreal_ind'],
-                self.y_score_dict[
+                name_and_val_dict['y_score_dict'][
                     'trainning_select_minfake_minreal_majreal_ind'],
                 labels=np.unique(self.data.y), verbose=display_report,
                 plot=plot_roc,
@@ -858,12 +701,12 @@ class MyNewModel:
                 return_value_for_cv=return_report_stat_for_cv
             )
             train_report, train_cm = (
-            None, None) if train_performance is None else train_performance
+                None, None) if train_performance is None else train_performance
             print('=====test======')
             test_performance = report_performance(
-                self.y_true_dict['test_select_minreal_majreal_ind'],
-                self.y_pred_dict['test_select_minreal_majreal_ind'],
-                self.y_score_dict['test_select_minreal_majreal_ind'],
+                name_and_val_dict['y_true_dict']['test_select_minreal_majreal_ind'],
+                name_and_val_dict['y_pred_dict']['test_select_minreal_majreal_ind'],
+                name_and_val_dict['y_score_dict']['test_select_minreal_majreal_ind'],
                 labels=np.unique(self.data.y), verbose=display_report,
                 plot=plot_roc,
                 save_status=save_file,
@@ -872,7 +715,7 @@ class MyNewModel:
                 return_value_for_cv=return_report_stat_for_cv)
 
             test_report, test_cm = (
-            None, None) if test_performance is None else test_performance
+                None, None) if test_performance is None else test_performance
         else:
             if plot_scan:
                 list_of_name = {'train_loss': (0, 0),
@@ -883,10 +726,10 @@ class MyNewModel:
                                 'test_select_maj_real_ind': (2, 0),
                                 }
 
-                file_name = f'{self.time_stamp}_from_{self.model_name}_scan=True'
+                # file_name = f'{self.time_stamp}_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}_scan=True'
                 self.plot_class.plot_using_list_of_name(subplot_size=(3, 1),
                                                         name_and_tuple_dict=list_of_name,
-                                                        save_file_name=file_name,
+                                                        save_file_name=scan_file_name,
                                                         title=title,
                                                         save_path=save_path)
 
@@ -899,20 +742,20 @@ class MyNewModel:
                                 'test_auc': (2, 0),
                                 }
 
-                file_name = f'{self.time_stamp}_from_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
+                # file_name = f'{self.time_stamp}_from_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
                 self.plot_class.plot_using_list_of_name(subplot_size=(3, 1),
                                                         name_and_tuple_dict=list_of_name,
-                                                        save_file_name=file_name,
+                                                        save_file_name=train_test_name,
                                                         title=title,
                                                         save_path=save_path)
 
             print('=====train========')
-            report_train_file = f'{self.time_stamp}_{self.model_name}_train_main_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
-            report_test_file = f'{self.time_stamp}_{self.model_name}_test_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
+            # report_train_file = f'{self.time_stamp}_{self.model_name}_train_main_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
+            # report_test_file = f'{self.time_stamp}_{self.model_name}_test_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
             train_performance = report_performance(
-                self.y_true_dict['trainning_select_minreal_majreal_ind'],
-                self.y_pred_dict['trainning_select_minreal_majreal_ind'],
-                self.y_score_dict['trainning_select_minreal_majreal_ind'],
+                name_and_val_dict['y_true_dict']['trainning_select_minreal_majreal_ind'],
+                name_and_val_dict['y_pred_dict']['trainning_select_minreal_majreal_ind'],
+                name_and_val_dict['y_score_dict']['trainning_select_minreal_majreal_ind'],
                 labels=np.unique(self.data.y), verbose=display_report,
                 plot=plot_roc,
                 save_status=save_file,
@@ -920,12 +763,12 @@ class MyNewModel:
                 file_name=report_train_file,
                 return_value_for_cv=return_report_stat_for_cv)
             train_report, train_cm = (
-            None, None) if train_performance is None else train_performance
+                None, None) if train_performance is None else train_performance
             print('=====test======')
             test_performance = report_performance(
-                self.y_true_dict['test_select_minreal_majreal_ind'],
-                self.y_pred_dict['test_select_minreal_majreal_ind'],
-                self.y_score_dict['test_select_minreal_majreal_ind'],
+                name_and_val_dict['y_true_dict']['test_select_minreal_majreal_ind'],
+                name_and_val_dict['y_pred_dict']['test_select_minreal_majreal_ind'],
+                name_and_val_dict['y_score_dict']['test_select_minreal_majreal_ind'],
                 labels=np.unique(self.data.y), verbose=display_report,
                 plot=plot_roc,
                 save_status=save_file,
@@ -933,9 +776,259 @@ class MyNewModel:
                 file_name=report_test_file,
                 return_value_for_cv=return_report_stat_for_cv)
             test_report, test_cm = (
-            None, None) if test_performance is None else test_performance
+                None, None) if test_performance is None else test_performance
 
+    def display_and_plot_result(self, epoch, name_and_val_dict):
 
+        self.display_result_per_epoch(epoch, name_and_val_dict)
+
+        # dict_for_plot = {'train_loss': name_and_val_dict['trainning_loss'],
+        #                      'train_acc': name_and_val_dict['accs_dict'][
+        #                          'trainning_select_minfake_minreal_majreal_ind'],
+        #                      'trainning_select_min_real_ind': name_and_val_dict['accs_dict'][
+        #                          'trainning_select_min_real_ind'],
+        #                      'trainning_select_maj_real_ind': name_and_val_dict['accs_dict'][
+        #                          'trainning_select_maj_real_ind'],
+        #                      'train_auc': name_and_val_dict['aucs_dict'][
+        #                          'trainning_select_minfake_minreal_majreal_ind'],
+        #                      'test_loss': name_and_val_dict['test_loss'],
+        #                      'test_acc': name_and_val_dict['accs_dict'][
+        #                          'test_select_minreal_majreal_ind'],
+        #                      'test_auc': name_and_val_dict['aucs_dict'][
+        #                          'test_select_minreal_majreal_ind'],
+        #                      'test_select_min_real_ind': name_and_val_dict['accs_dict'][
+        #                          'test_select_min_real_ind'],
+        #                      'test_select_maj_real_ind': name_and_val_dict['accs_dict'][
+        #                          'test_select_maj_real_ind'],
+        #                      'select_min_fake_ind': name_and_val_dict['accs_dict'][
+        #                          'select_min_fake_ind']
+        #                      }
+        #
+        # self.plot_class.collect_hist_using_list_of_name(
+        #     dict_for_plot=dict_for_plot)
+
+        # if not self.run_gcn_only:
+        #     self.display_result_per_epoch(epoch, name_and_val_dict)
+        #
+        #     self.plot_class.collect_hist_using_list_of_name(
+        #         name_and_val_dict=name_and_val_dict)
+        # else:
+        #     self.display_result_per_epoch(epoch, name_and_val_dict)
+        #
+        #     self.plot_class.collect_hist_using_list_of_name(
+        #         name_and_val_dict=name_and_val_dict)
+
+    def display_result_per_epoch(self, epoch, name_and_val_dict, ):
+        if not self.run_gcn_only:
+
+            print(f"""
+                Epoch: {epoch:03d},
+                Trainning: (loss: {name_and_val_dict['train_loss']:.4f}, min_real: acc={name_and_val_dict['accs_dict']["trainning_select_min_real_ind"]:.4f} maj: acc={name_and_val_dict['accs_dict']["trainning_select_maj_real_ind"]:.4f})  min_fake: acc={name_and_val_dict['accs_dict']["select_min_fake_ind"]:.4f}
+                Test     : (loss: {name_and_val_dict['test_loss']:.4f} min_real = acc={name_and_val_dict['accs_dict']["test_select_min_real_ind"]:.4f} maj: acc={name_and_val_dict['accs_dict']["test_select_maj_real_ind"]:.4f}) 
+
+                Train: (acc={name_and_val_dict['accs_dict']["trainning_select_minfake_minreal_majreal_ind"]:.4f}, auc={name_and_val_dict['aucs_dict']["trainning_select_minfake_minreal_majreal_ind"]: .4f}, loss={name_and_val_dict['train_loss']:.4f})
+                Test: ({name_and_val_dict['accs_dict']["test_select_minreal_majreal_ind"]:.4f}, auc={name_and_val_dict['aucs_dict']["test_select_minreal_majreal_ind"]:4f}, loss={name_and_val_dict['test_loss']:.4f})
+            """)
+        else:
+            print(f"""
+                Epoch: {epoch:03d},
+                Trainning: (loss: {name_and_val_dict['train_loss']:.4f}, min_real: acc={name_and_val_dict['accs_dict']["trainning_select_min_real_ind"]:.4f} maj: acc={name_and_val_dict['accs_dict']["trainning_select_maj_real_ind"]:.4f})
+                Test     : (loss: {name_and_val_dict['test_loss']:.4f} min_real: acc={name_and_val_dict['accs_dict']["test_select_min_real_ind"]:.4f} maj: acc={name_and_val_dict['accs_dict']["test_select_maj_real_ind"]:.4f}) 
+                Train: (acc={name_and_val_dict['accs_dict']["trainning_select_minreal_majreal_ind"]:.4f}, auc={name_and_val_dict['aucs_dict']["trainning_select_minreal_majreal_ind"]: .4f}, loss={name_and_val_dict['train_loss']:.4f})
+                Test: ({name_and_val_dict['accs_dict']["test_select_minreal_majreal_ind"]:.4f}, auc={name_and_val_dict['aucs_dict']["test_select_minreal_majreal_ind"]:4f}, loss={name_and_val_dict['test_loss']:.4f})
+            """)
+
+    def prep_train_test_data_index(self,epoch):
+
+        if epoch == 0:
+            self.model_input_data.set_data()
+            self.model_input_data.set_train_test_data_index()
+
+        self.data.trainning_select_min_real_ind = self.model_input_data.trainning_select_min_real_ind
+        self.data.trainning_select_maj_real_ind = self.model_input_data.trainning_select_maj_real_ind
+        self.data.trainning_selected_ind = self.model_input_data.trainning_selected_ind
+
+        self.data.test_select_min_real_ind = self.model_input_data.test_select_min_real_ind
+        self.data.test_select_maj_real_ind = self.model_input_data.test_select_maj_real_ind
+        self.data.test_selected_ind = self.model_input_data.test_selected_ind
+
+        self.data.trainning_select_minreal_majreal_ind = self.model_input_data.trainning_select_minreal_majreal_ind
+        self.data.test_select_minreal_majreal_ind = self.model_input_data.test_select_minreal_majreal_ind
+
+    def prepare_data_ind(self):
+
+        self.data.trainning_select_min_real_ind = self.model_input_data.trainning_select_min_real_ind
+        self.data.trainning_select_maj_real_ind = self.model_input_data.trainning_select_maj_real_ind
+        self.data.trainning_selected_ind = self.model_input_data.trainning_selected_ind
+
+        self.data.test_select_min_real_ind = self.model_input_data.test_select_min_real_ind
+        self.data.test_select_maj_real_ind = self.model_input_data.test_select_maj_real_ind
+        self.data.test_selected_ind = self.model_input_data.test_selected_ind
+
+        self.data.select_min_fake_ind = self.model_input_data.select_min_fake_ind
+
+        self.data.trainning_select_minreal_majreal_ind = self.model_input_data.trainning_select_minreal_majreal_ind
+        self.data.trainning_select_minfake_minreal_majreal_ind = self.model_input_data.trainning_select_minfake_minreal_majreal_ind
+        self.data.test_select_minreal_majreal_ind = self.model_input_data.test_select_minreal_majreal_ind
+        self.data.test_select_minfake_minreal_majreal_ind = self.model_input_data.test_select_minfake_minreal_majreal_ind
+
+    def get_result_of_gcn_gan(self, name_and_val_dict, is_train):
+
+        y_pred_dict = {}
+        y_score_dict = {}
+        y_true_dict = {}
+        accs_dict = {}
+        aucs_dict = {}
+
+        if is_train :
+            name_and_mask_dict = {
+                'trainning_select_minfake_minreal_majreal_ind': self.data.trainning_select_minfake_minreal_majreal_ind,
+                'trainning_select_minreal_majreal_ind': self.data.trainning_select_minreal_majreal_ind,
+                'trainning_select_min_real_ind': self.data.trainning_select_min_real_ind,
+                'trainning_select_maj_real_ind': self.data.trainning_select_maj_real_ind,
+                'select_min_fake_ind': self.data.select_min_fake_ind
+                # 'test_select_minfake_minreal_majreal_ind': self.data.test_select_minfake_minreal_majreal_ind,
+                # 'test_select_min_real_ind': self.data.test_select_min_real_ind,
+                # 'test_select_maj_real_ind': self.data.test_select_maj_real_ind
+            }
+            for name, mask in name_and_mask_dict.items():
+
+                pred = name_and_val_dict['logits'][mask].max(1)[1]
+                y_true_mask = name_and_val_dict['y_true'][mask]
+                y_score = name_and_val_dict['logits'][mask].detach().numpy()
+                y_score = name_and_val_dict['logits'][mask].cpu().detach().numpy()
+
+                y_pred_dict.setdefault(name, pred.detach().numpy())
+                y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
+                y_score_dict.setdefault(name, y_score)
+                y_true_dict.setdefault(name, y_true_mask.detach().numpy())
+                y_true_dict.setdefault(name, y_true_mask.cpu().detach().numpy())
+
+                acc = pred.eq(y_true_mask).sum().item() / mask.shape[0]
+                accs_dict.setdefault(name, acc)
+                self.accs_hist_dict.setdefault(name, []).append(acc)
+
+                if name in ['trainning_select_minfake_minreal_majreal_ind',
+                            'test_select_minreal_majreal_ind']:
+                    auc = get_total_roc_auc_score(y_true_mask, y_score)
+                    auc = get_total_roc_auc_score(
+                        y_true_mask.cpu().detach().numpy(), y_score)
+                    aucs_dict.setdefault(name, auc)
+                    # accs_hist_dict.setdefault(name, []).append(acc)
+                    self.aucs_hist_dict.setdefault(name, []).append(auc)
+
+        else:
+            name_and_mask_dict = {
+                # 'test_select_minfake_minreal_majreal_ind': self.data.test_select_minfake_minreal_majreal_ind,
+                'test_select_minreal_majreal_ind': self.data.test_select_minreal_majreal_ind,
+                'test_select_min_real_ind': self.data.test_select_min_real_ind,
+                'test_select_maj_real_ind': self.data.test_select_maj_real_ind,
+                # 'select_min_fake_ind': self.data.select_min_fake_ind
+            }
+
+            for name, mask in name_and_mask_dict.items():
+
+                pred = name_and_val_dict['logits'][mask].max(1)[1]
+                y_true_mask = name_and_val_dict['y_true'][mask]
+                y_score = name_and_val_dict['logits'][
+                    mask].cpu().detach().numpy()
+
+                y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
+                y_score_dict.setdefault(name, y_score)
+                y_true_dict.setdefault(name, y_true_mask)
+
+                acc = pred.eq(y_true_mask).sum().item() / mask.shape[0]
+                accs_dict.setdefault(name, acc)
+                self.accs_hist_dict.setdefault(name, []).append(acc)
+
+                if name in ['trainning_select_minreal_majreal_ind',
+                            'test_select_minreal_majreal_ind']:
+                    auc = get_total_roc_auc_score(
+                        y_true_mask.cpu().detach().numpy(),
+                        y_score)
+                    aucs_dict.setdefault(name, auc)
+                    # accs_hist_dict.setdefault(name, []).append(acc)
+                    self.aucs_hist_dict.setdefault(name, []).append(auc)
+
+        return y_true_dict, y_pred_dict, y_score_dict, y_score_dict, accs_dict, aucs_dict
+
+    def get_result_of_gcn(self, name_and_val_dict):
+
+        y_pred_dict = {}
+        y_score_dict = {}
+        y_true_dict = {}
+        accs_dict = {}
+        aucs_dict = {}
+
+        name_and_mask_dict = {
+            'trainning_select_minreal_majreal_ind': self.data.trainning_select_minreal_majreal_ind,
+            'trainning_select_min_real_ind': self.data.trainning_select_min_real_ind,
+            'trainning_select_maj_real_ind': self.data.trainning_select_maj_real_ind,
+            'test_select_minreal_majreal_ind': self.data.test_select_minreal_majreal_ind,
+            'test_select_min_real_ind': self.data.test_select_min_real_ind,
+            'test_select_maj_real_ind': self.data.test_select_maj_real_ind
+        }
+
+        for name, mask in name_and_mask_dict.items():
+
+            pred = name_and_val_dict['logits'][mask].max(1)[1]
+            y_true_mask = name_and_val_dict['y_true'][mask]
+            y_score = name_and_val_dict['logits'][mask].cpu().detach().numpy()
+
+            y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
+            y_score_dict.setdefault(name, y_score)
+            y_true_dict.setdefault(name, y_true_mask)
+
+            acc = pred.eq(y_true_mask).sum().item() / mask.shape[0]
+            accs_dict.setdefault(name, acc)
+            self.accs_hist_dict.setdefault(name, []).append(acc)
+
+            if name in ['trainning_select_minreal_majreal_ind',
+                        'test_select_minreal_majreal_ind']:
+                auc = get_total_roc_auc_score(y_true_mask, y_score)
+                aucs_dict.setdefault(name, auc)
+                self.aucs_hist_dict.setdefault(name, []).append(auc)
+
+        return y_true_dict, y_pred_dict, y_score_dict, y_score_dict, accs_dict, aucs_dict
+
+    def apply_tsne_on_emb(self, emb, run_gcn_only=None):
+        assert run_gcn_only is not None, "run_gcn_only must be specified to avoid ambiguity"
+        emb_dict = {}
+
+        from sklearn.manifold import TSNE
+
+        emb_2d = TSNE(n_components=2).fit_transform(emb)
+        print(emb_2d.shape)
+        # output (4, 2)
+        if not run_gcn_only:
+            emb_dict.setdefault('test', emb_2d[self.data.test_selected_ind])
+            emb_dict.setdefault('train', emb_2d[self.data.trainning_selected_ind])
+            emb_dict.setdefault('min_real', np.concatenate((emb_2d[
+                                                                self.data.trainning_select_min_real_ind.cpu().detach().numpy()],
+                                                            emb_2d[
+                                                                self.data.test_select_min_real_ind.cpu().detach().numpy()]),
+                                                           axis=0))
+            emb_dict.setdefault('min_fake', emb_2d[self.data.select_min_fake_ind])
+            emb_dict.setdefault('maj', np.concatenate((emb_2d[
+                                                           self.data.trainning_select_maj_real_ind.cpu().detach().numpy()],
+                                                       emb_2d[
+                                                           self.data.test_select_maj_real_ind.cpu().detach().numpy()]),
+                                                      0))
+        else:
+            emb_dict.setdefault('test', emb_2d[self.data.test_selected_ind])
+            emb_dict.setdefault('train', emb_2d[self.data.trainning_selected_ind])
+            emb_dict.setdefault('min_real', np.concatenate((emb_2d[
+                                                                self.data.trainning_select_min_real_ind.cpu().detach().numpy()],
+                                                            emb_2d[
+                                                                self.data.test_select_min_real_ind.cpu().detach().numpy()]),
+                                                           axis=0))
+            emb_dict.setdefault('maj', np.concatenate((emb_2d[
+                                                           self.data.trainning_select_maj_real_ind.cpu().detach().numpy()],
+                                                       emb_2d[
+                                                           self.data.test_select_maj_real_ind.cpu().detach().numpy()]),
+                                                      0))
+
+        return emb_dict
 
 def ratio_func(y, multiplier, minority_class):
     target_stats = Counter(y)
@@ -958,6 +1051,84 @@ class CoraTorchDataset(Dataset):
         return self.data[idx], self.y[idx]
 
 
+def get_folder(condition_to_consider):
+    assert isinstance(condition_to_consider, dict), ""
+    import os
+
+
+    cur_dir =  os.getcwd()
+    folder = cur_dir + '/../Report/'
+    if condition_to_consider['dataset'] == 'cora':
+        dataset = 'cora/'
+    elif condition_to_consider['dataset'] == 'citeseer':
+        dataset = 'citeseer'
+    else:
+        raise ValueError("")
+
+    if condition_to_consider['model_name'] == 'train_model':
+        model_name = 'train_model'
+    elif condition_to_consider['model_name'] == 'run_gcn':
+        model_name = 'run_gcn'
+    else:
+        raise ValueError('')
+
+    folder = folder + f'/{dataset}/{model_name}'
+    return folder
+
+def create_file_naming_convension(condition_to_consider, title=None, emb=None, is_train=None, scan=None, train_test=None, report=None):
+    report_name = ''
+    emb_name = ''
+    scan_name = ''
+    train_test_name = ''
+    is_train_name = ''
+    if title is not None:
+        assert emb is None, ''
+        assert scan is None, ''
+        assert train_test is None, ''
+        assert report is None, ''
+    elif report is not None:
+        assert is_train is not None,''
+        is_train_name = 'train_' if is_train else 'test_'
+        assert emb is None, ''
+        assert scan is None, ''
+        assert train_test is None, ''
+    elif emb is not None:
+        emb_name = 'emb_'
+        assert report is None, ''
+        assert scan is None, ''
+        assert train_test is None, ''
+    elif scan is not None:
+        scan_name = 'scan_'
+        assert emb is None, ''
+        assert report is None, ''
+        assert train_test is None, ''
+    elif train_test is not None:
+        train_test_name = 'train_test_'
+        assert emb is None, ''
+        assert scan is None, ''
+        assert report is None, ''
+    else:
+        raise ValueError('')
+
+    assert isinstance(condition_to_consider, dict), ""
+    # assert time_stamp is not None, "time_stamp must be specified to avoid ambiguity"
+
+    if condition_to_consider['model_name'] == 'train_model':
+        model_name = 'train_model_'
+    elif condition_to_consider['model_name'] == 'run_gcn':
+        model_name = 'run_gcn_'
+    else:
+        raise ValueError('')
+
+    if condition_to_consider['is_downsampled']:
+        is_downsampled = 'downsampled_'
+    else:
+        is_downsampled = ''
+
+    label = emb_name + report_name + scan_name + train_test_name + is_train_name
+    file_name = f"{condition_to_consider['time_stamp']}_{model_name}_edge_percent={condition_to_consider['preserved_edges_percent']}_ep={condition_to_consider['main_epoch']}_gan_ep={condition_to_consider['num_gan_epoch']}_{is_downsampled}_{label}"
+    return file_name
+
 if __name__ == '__main__':
     # dataset = 'Cora'
     # path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Data',
@@ -971,6 +1142,7 @@ if __name__ == '__main__':
 
     dataset = args.dataset  # cora, citeseer
 
+
     model_name = 'run_gcn' if args.run_gcn_only else 'train_model'
     log = Logging.Logger(name=f'log_for_{model_name}_file')
 
@@ -980,5 +1152,10 @@ if __name__ == '__main__':
                               num_gan_epoch=args.num_gan_epoch,
                               k_fold_split=args.k_fold_split,
                               run_gcn_only=args.run_gcn_only,
-                              model_name=model_name, device=device)
+                              model_name=model_name,
+                              downsample=args.downsample,
+                              device=device,
+                              preserved_edges_percent=args.preserved_edges_percent)
+
     my_new_model.run_my_new_model()
+

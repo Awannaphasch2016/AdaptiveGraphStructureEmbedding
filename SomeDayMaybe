@@ -1,0 +1,20 @@
+SomeDayMayb (unordered)
+> create function that will be used with if-else state 
+	Goal: This is to make the code more compact and readable
+> save the following to cahcer
+	: logging decorator 
+	: timer decorator
+	: update args_parser page
+	: PLotClass
+	: create generic PlotEmb class
+	: create report_performance class
+> create type convertion function
+	: all dictionary of variable to the function and 
+> use dictionary to pass variables to model
+> pass the following class as args:
+	: PlotClass
+	: ReportPerformance (create this if it does not already exist) 
+	: PlotEmb
+> add decorator to function that required logging 
+> add decorator to  function that required timing 
+

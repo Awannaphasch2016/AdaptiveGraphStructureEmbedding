@@ -34,11 +34,11 @@ class PlotClass:
         self.plt = plt
         self.save_status = {}
 
-    def collect_hist_using_list_of_name(self, name_and_val_dict, ):
+    def collect_hist_using_list_of_name(self, dict_for_plot, ):
 
-       assert isinstance(name_and_val_dict, dict), ''
+       assert isinstance(dict_for_plot, dict), ''
 
-       for name, val in name_and_val_dict.items():
+       for name, val in dict_for_plot.items():
            self.collect_hist(name, val)
 
     def plot_using_list_of_name(self, subplot_size,name_and_tuple_dict,save_file_name, title=None, save_path=None):

@@ -149,6 +149,7 @@ class GCN:
         perm = np.random.permutation(nnz)
         preserve_nnz = int(nnz * self.preserved_percent)
         perm = perm[:preserve_nnz]
+        print(perm)
         top = self.data.edge_index[0][perm].reshape(1,-1)
         bottom = self.data.edge_index[1][perm].reshape(1,-1)
         self.data.edge_index = torch.cat((top, bottom),dim=0)

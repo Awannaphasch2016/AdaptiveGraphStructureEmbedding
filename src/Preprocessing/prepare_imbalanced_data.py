@@ -2,9 +2,10 @@ import numpy as np
 import torch
 
 class ModelInputData():
-    def __init__(self, dataset, downsample=True):
+    def __init__(self, dir ,dataset, downsample=True):
 
         self.downsample = downsample
+        self.dir = dir
         if dataset == 'cora':
             self.data = self.preparing_cora_for_new_purposed_model()
             self.cora_prepare_ind_for_trainning_and_test_set()
@@ -39,7 +40,9 @@ class ModelInputData():
     def preparing_cora_for_new_purposed_model(self):
 
         data, _ = torch.load(
-            r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\Examples\data\Cora\Cora\processed\data.pt')
+            f'{self.dir}\\..\\Notebook\\Examples\\data\\Cora\\Cora\\processed\\data.pt')
+        # data, _ = torch.load(
+        #     r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\Examples\data\Cora\Cora\processed\data.pt')
         data.y_before_relabel = np.array(data.y)
         new_y = self.relabel_minority_and_majority_classes(data)
         data.y = new_y
