@@ -45,8 +45,9 @@ class ModelInputData():
         #     r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\Examples\data\Cora\Cora\processed\data.pt')
         data.y_before_relabel = np.array(data.y)
         new_y = self.relabel_minority_and_majority_classes(data)
-        data.y = new_y
+        data.y = torch.tensor(new_y).type(torch.long)
         data.num_classes = np.unique(data.y).shape[0]
+
         return data
 
     def citeseer_prepare_ind_for_trainning_and_test_set(self):

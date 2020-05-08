@@ -1,7 +1,9 @@
 import inspect
+import itertools
 import os
 import sys
 import time
+import pandas as pd
 
 from sklearn.model_selection import StratifiedKFold
 
@@ -157,13 +159,15 @@ class MyNewModel:
         # =====================
 
         self.collect_data_for_plotting()
-        self.plot_scan_and_loss(name_and_val_dict=name_and_val_dict,
+        test_report, test_cm = self.plot_scan_and_loss(name_and_val_dict=name_and_val_dict,
                                 plot_scan=True,
                                 plot_train_test=True,
-                                plot_roc=True,
                                 save_file=args.save_cv_file,
                                 save_plot=args.save_cv_plot,
-                                display_report=True)
+                                display_report=True,
+                                return_report_stat_for_cv=True)
+        avg_auc, avg_acc = test_report.loc['acc/total']['AUC'], test_report.loc['acc/total']['ACC']
+        return avg_auc, avg_acc
 
     def run_my_new_model_once(self, epoch):
         if self.log:
@@ -190,7 +194,8 @@ class MyNewModel:
     def run_gcn_once(self, epoch, name_and_val_dict):
         logits, trainning_loss, test_loss, emb = self.train_gcn_once(name_and_val_dict)
 
-        name_and_val_dict['y_true']  = torch.tensor(self.data.y).type(torch.long)
+        # name_and_val_dict['y_true']  = torch.tensor(self.data.y).type(torch.long)
+        name_and_val_dict['y_true']  = self.data.y
         name_and_val_dict['logits'] = logits
         self.get_result_per_epoch(name_and_val_dict)
 
@@ -463,7 +468,7 @@ class MyNewModel:
             run_all=True)
         trainning_loss = self.gcn.loss_and_step(
             logits[self.model_input_data.trainning_selected_ind],
-            torch.tensor(self.data.y).type(torch.long)[
+            self.data.y[
                 self.model_input_data.trainning_selected_ind])
 
         # =====================
@@ -477,7 +482,7 @@ class MyNewModel:
 
         test_loss = self.gcn.loss_and_step(
             logits[self.model_input_data.test_selected_ind],
-            torch.tensor(self.data.y).type(torch.long)[
+            self.data.y[
                 self.model_input_data.test_selected_ind])
 
         self.collect_var_in_name_and_val_dict(name_and_val_dict, **{'trainning_loss': trainning_loss,
@@ -515,7 +520,7 @@ class MyNewModel:
         minreal_minfake_majreal_x = torch.cat(
             (train_emb_after_conv1, fake_data), 0).to(self.device)
         minreal_minfake_majreal_y = torch.cat(
-            (torch.tensor(self.data.y).type(torch.long),
+            (self.data.y,
              torch.zeros(
                  fake_data.size(0)).type(
                  torch.long)), 0).type(
@@ -555,12 +560,12 @@ class MyNewModel:
 
         test_loss = self.gcn.loss(
             logits[self.data.test_selected_ind],
-            torch.tensor(self.data.y).type(torch.long)[
+            self.data.y[
                 self.data.test_selected_ind].to(self.device))
 
 
 
-        name_and_val_dict['y_true']  = y_true.type(torch.long)
+        name_and_val_dict['y_true']  = y_true
         name_and_val_dict['logits'] = logits
         self.get_result_per_epoch(name_and_val_dict, is_train=False)
 
@@ -602,15 +607,10 @@ class MyNewModel:
             'time_stamp': self.time_stamp,
             'preserved_edges_percent': self.preserved_edges_percent
         }
-        # save_path = get_folder(naming_convention_dict)
-        # file_name = create_file_naming_convension(naming_convention_dict)
 
         #=====================
         #==plot emb
         #=====================
-        # title = create_file_naming_convension(naming_convention_dict)
-        # file = f'{self.time_stamp}_{self.model_name}_emb_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
-        # title = f'{self.time_stamp}_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
         save_path = self.save_path
         title = create_file_naming_convension(naming_convention_dict, title=True)
         emb_file_name = create_file_naming_convension(naming_convention_dict, emb=True)
@@ -678,14 +678,6 @@ class MyNewModel:
                                                         save_path=save_path)
 
             print('=====train========')
-            # report_train_file = create_file_naming_convension(naming_convention_dict,
-            #                                           report=True, is_train=True)
-            # report_test_file = create_file_naming_convension(naming_convention_dict,
-            #                                           report=True, is_train=False)
-
-            # report_train_file = f'{self.time_stamp}_{self.model_name}_train_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
-            # report_test_file = f'{self.time_stamp}_{self.model_name}_test_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
-            # Todo fixed the current bug
             train_performance = report_performance(
                 name_and_val_dict['y_true_dict'][
                     'trainning_select_minfake_minreal_majreal_ind'],
@@ -726,7 +718,6 @@ class MyNewModel:
                                 'test_select_maj_real_ind': (2, 0),
                                 }
 
-                # file_name = f'{self.time_stamp}_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}_scan=True'
                 self.plot_class.plot_using_list_of_name(subplot_size=(3, 1),
                                                         name_and_tuple_dict=list_of_name,
                                                         save_file_name=scan_file_name,
@@ -742,7 +733,6 @@ class MyNewModel:
                                 'test_auc': (2, 0),
                                 }
 
-                # file_name = f'{self.time_stamp}_from_{self.model_name}_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
                 self.plot_class.plot_using_list_of_name(subplot_size=(3, 1),
                                                         name_and_tuple_dict=list_of_name,
                                                         save_file_name=train_test_name,
@@ -750,8 +740,6 @@ class MyNewModel:
                                                         save_path=save_path)
 
             print('=====train========')
-            # report_train_file = f'{self.time_stamp}_{self.model_name}_train_main_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
-            # report_test_file = f'{self.time_stamp}_{self.model_name}_test_ep={self.main_epoch}_gan_ep={self.num_gan_epoch}_{self.is_downsampled}'
             train_performance = report_performance(
                 name_and_val_dict['y_true_dict']['trainning_select_minreal_majreal_ind'],
                 name_and_val_dict['y_pred_dict']['trainning_select_minreal_majreal_ind'],
@@ -777,46 +765,11 @@ class MyNewModel:
                 return_value_for_cv=return_report_stat_for_cv)
             test_report, test_cm = (
                 None, None) if test_performance is None else test_performance
+        return test_report, test_cm
 
     def display_and_plot_result(self, epoch, name_and_val_dict):
 
         self.display_result_per_epoch(epoch, name_and_val_dict)
-
-        # dict_for_plot = {'train_loss': name_and_val_dict['trainning_loss'],
-        #                      'train_acc': name_and_val_dict['accs_dict'][
-        #                          'trainning_select_minfake_minreal_majreal_ind'],
-        #                      'trainning_select_min_real_ind': name_and_val_dict['accs_dict'][
-        #                          'trainning_select_min_real_ind'],
-        #                      'trainning_select_maj_real_ind': name_and_val_dict['accs_dict'][
-        #                          'trainning_select_maj_real_ind'],
-        #                      'train_auc': name_and_val_dict['aucs_dict'][
-        #                          'trainning_select_minfake_minreal_majreal_ind'],
-        #                      'test_loss': name_and_val_dict['test_loss'],
-        #                      'test_acc': name_and_val_dict['accs_dict'][
-        #                          'test_select_minreal_majreal_ind'],
-        #                      'test_auc': name_and_val_dict['aucs_dict'][
-        #                          'test_select_minreal_majreal_ind'],
-        #                      'test_select_min_real_ind': name_and_val_dict['accs_dict'][
-        #                          'test_select_min_real_ind'],
-        #                      'test_select_maj_real_ind': name_and_val_dict['accs_dict'][
-        #                          'test_select_maj_real_ind'],
-        #                      'select_min_fake_ind': name_and_val_dict['accs_dict'][
-        #                          'select_min_fake_ind']
-        #                      }
-        #
-        # self.plot_class.collect_hist_using_list_of_name(
-        #     dict_for_plot=dict_for_plot)
-
-        # if not self.run_gcn_only:
-        #     self.display_result_per_epoch(epoch, name_and_val_dict)
-        #
-        #     self.plot_class.collect_hist_using_list_of_name(
-        #         name_and_val_dict=name_and_val_dict)
-        # else:
-        #     self.display_result_per_epoch(epoch, name_and_val_dict)
-        #
-        #     self.plot_class.collect_hist_using_list_of_name(
-        #         name_and_val_dict=name_and_val_dict)
 
     def display_result_per_epoch(self, epoch, name_and_val_dict, ):
         if not self.run_gcn_only:
@@ -895,14 +848,11 @@ class MyNewModel:
 
                 pred = name_and_val_dict['logits'][mask].max(1)[1]
                 y_true_mask = name_and_val_dict['y_true'][mask]
-                y_score = name_and_val_dict['logits'][mask].detach().numpy()
-                y_score = name_and_val_dict['logits'][mask].cpu().detach().numpy()
+                y_score = name_and_val_dict['logits'][mask]
 
-                y_pred_dict.setdefault(name, pred.detach().numpy())
-                y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
+                y_pred_dict.setdefault(name, pred)
                 y_score_dict.setdefault(name, y_score)
-                y_true_dict.setdefault(name, y_true_mask.detach().numpy())
-                y_true_dict.setdefault(name, y_true_mask.cpu().detach().numpy())
+                y_true_dict.setdefault(name, y_true_mask)
 
                 acc = pred.eq(y_true_mask).sum().item() / mask.shape[0]
                 accs_dict.setdefault(name, acc)
@@ -910,11 +860,10 @@ class MyNewModel:
 
                 if name in ['trainning_select_minfake_minreal_majreal_ind',
                             'test_select_minreal_majreal_ind']:
-                    auc = get_total_roc_auc_score(y_true_mask, y_score)
                     auc = get_total_roc_auc_score(
-                        y_true_mask.cpu().detach().numpy(), y_score)
+                        y_true_mask.cpu().detach().numpy(), y_score.cpu().detach().numpy())
+                    auc = torch.tensor(auc).type(torch.long)
                     aucs_dict.setdefault(name, auc)
-                    # accs_hist_dict.setdefault(name, []).append(acc)
                     self.aucs_hist_dict.setdefault(name, []).append(auc)
 
         else:
@@ -931,9 +880,9 @@ class MyNewModel:
                 pred = name_and_val_dict['logits'][mask].max(1)[1]
                 y_true_mask = name_and_val_dict['y_true'][mask]
                 y_score = name_and_val_dict['logits'][
-                    mask].cpu().detach().numpy()
+                    mask]
 
-                y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
+                y_pred_dict.setdefault(name, pred)
                 y_score_dict.setdefault(name, y_score)
                 y_true_dict.setdefault(name, y_true_mask)
 
@@ -945,9 +894,9 @@ class MyNewModel:
                             'test_select_minreal_majreal_ind']:
                     auc = get_total_roc_auc_score(
                         y_true_mask.cpu().detach().numpy(),
-                        y_score)
+                        y_score.cpu().detach().numpy())
+                    auc = torch.tensor(auc).type(torch.long)
                     aucs_dict.setdefault(name, auc)
-                    # accs_hist_dict.setdefault(name, []).append(acc)
                     self.aucs_hist_dict.setdefault(name, []).append(auc)
 
         return y_true_dict, y_pred_dict, y_score_dict, y_score_dict, accs_dict, aucs_dict
@@ -973,9 +922,9 @@ class MyNewModel:
 
             pred = name_and_val_dict['logits'][mask].max(1)[1]
             y_true_mask = name_and_val_dict['y_true'][mask]
-            y_score = name_and_val_dict['logits'][mask].cpu().detach().numpy()
+            y_score = name_and_val_dict['logits'][mask]
 
-            y_pred_dict.setdefault(name, pred.cpu().detach().numpy())
+            y_pred_dict.setdefault(name, pred)
             y_score_dict.setdefault(name, y_score)
             y_true_dict.setdefault(name, y_true_mask)
 
@@ -985,7 +934,8 @@ class MyNewModel:
 
             if name in ['trainning_select_minreal_majreal_ind',
                         'test_select_minreal_majreal_ind']:
-                auc = get_total_roc_auc_score(y_true_mask, y_score)
+                auc = get_total_roc_auc_score(y_true_mask.cpu().detach().numpy(), y_score.cpu().detach().numpy())
+                auc = torch.tensor(auc).type(torch.long)
                 aucs_dict.setdefault(name, auc)
                 self.aucs_hist_dict.setdefault(name, []).append(auc)
 
@@ -1029,6 +979,13 @@ class MyNewModel:
                                                       0))
 
         return emb_dict
+
+    def collect_var_in_name_and_val_dict(self, dictionary, **kwargs):
+        for key, val in kwargs.items():
+            dictionary[key] = val
+        return dictionary
+
+
 
 def ratio_func(y, multiplier, minority_class):
     target_stats = Counter(y)
@@ -1140,22 +1097,56 @@ if __name__ == '__main__':
     np.random.seed(111)
     torch.manual_seed(111)
 
-    dataset = args.dataset  # cora, citeseer
-
-
-    model_name = 'run_gcn' if args.run_gcn_only else 'train_model'
-    log = Logging.Logger(name=f'log_for_{model_name}_file')
-
+    # log = Logging.Logger(name=f'log_for_{model_name}_file')
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    # todo here>> convert torch geometric data to torch data:
-    my_new_model = MyNewModel(dataset, main_epoch=args.main_epoch,
-                              num_gan_epoch=args.num_gan_epoch,
-                              k_fold_split=args.k_fold_split,
-                              run_gcn_only=args.run_gcn_only,
-                              model_name=model_name,
-                              downsample=args.downsample,
-                              device=device,
-                              preserved_edges_percent=args.preserved_edges_percent)
 
-    my_new_model.run_my_new_model()
+    if args.manual:
+        """--manual -pasac"""
+        main_epoch = [50, 100, 200]
+        num_gan_epoch =  [1,5,10,25,50]
+        preserved_edges_percent = [1]
+        model_name_list = ['train_model', 'run_gcn']
+        dataset_list = ['cora']
+
+        # main_epoch = [1, 2]
+        # num_gan_epoch =  [1]
+        # preserved_edges_percent = [1]
+        # model_name_list = ['train_model', 'run_gcn']
+        # dataset_list = ['cora']
+
+        epoch_pair = itertools.product(main_epoch, num_gan_epoch, preserved_edges_percent, model_name_list, dataset_list)
+
+        model_performance_dict = {}
+        for i,(e, ge, percent, model_name, dataset) in enumerate(epoch_pair):
+            args.main_epoch = e
+            args.num_gan_epoch = ge
+            args.preserved_edges_percent = percent
+            args.dataset = dataset
+            my_new_model = MyNewModel(dataset, main_epoch=args.main_epoch,
+                                      num_gan_epoch=args.num_gan_epoch,
+                                      k_fold_split=args.k_fold_split,
+                                      run_gcn_only=args.run_gcn_only,
+                                      model_name=model_name,
+                                      downsample=args.downsample,
+                                      device=device,
+                                      preserved_edges_percent=args.preserved_edges_percent)
+            avg_auc, avg_acc = my_new_model.run_my_new_model()
+            model_performance_dict[f'({model_name}_epoch={e}_gan_epoch={ge}_edge_percent={percent})'] = {'avg_auc':avg_auc, 'avg_acc':avg_acc}
+
+        file_path = os.path.dirname(os.getcwd())+ f'\\Output\\Report\\{args.dataset}\\{my_new_model.time_stamp}_experiment.csv'
+        print(f'save experiment to {file_path}')
+        pd.DataFrame.from_dict(model_performance_dict).transpose().to_csv(file_path)
+    else:
+        """--run_gcn_gan -ng 1 -me 3 -pep 0.3 -pasac"""
+        dataset = args.dataset  # cora, citeseer
+        model_name = 'run_gcn' if args.run_gcn_only else 'train_model'
+        my_new_model = MyNewModel(dataset, main_epoch=args.main_epoch,
+                                  num_gan_epoch=args.num_gan_epoch,
+                                  k_fold_split=args.k_fold_split,
+                                  run_gcn_only=args.run_gcn_only,
+                                  model_name=model_name,
+                                  downsample=args.downsample,
+                                  device=device,
+                                  preserved_edges_percent=args.preserved_edges_percent)
+        avg_auc, avg_acc = my_new_model.run_my_new_model()
 

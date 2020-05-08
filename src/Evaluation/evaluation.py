@@ -2,6 +2,7 @@ import copy
 
 import numpy as np
 import pandas as pd
+import torch
 from sklearn.metrics import auc
 from sklearn.metrics import classification_report
 from sklearn.metrics import roc_auc_score
@@ -42,6 +43,19 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
            report_final_performance_report_np: type = numpy
            columns_of_performance_metric:  type = list: desc = list of performance metrics name
     """
+    if isinstance(y_true, type(torch.tensor([1]))):
+        y_true = y_true.cpu().detach().numpy()
+    if isinstance(y_score, type(torch.tensor([1]))):
+        y_score = y_score.cpu().detach().numpy()
+    if isinstance(y_pred, type(torch.tensor([1]))):
+        y_pred = y_pred.cpu().detach().numpy()
+
+    assert isinstance(y_true, np.ndarray),''
+    assert isinstance(y_pred, np.ndarray),''
+    assert isinstance(y_score, np.ndarray),''
+
+
+
     assert isinstance(save_status,bool), ''
     pd.set_option('max_columns', None)
     pd.set_option('expand_frame_repr', False)
@@ -129,6 +143,7 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
                                       y_score, np.unique(y_true).shape[0])
 
     roc_auc = {i: [j] for i, j in roc_auc.items()}
+
     # todo this is just avg not micro avg
     # TODO create macro_avg,
     # roc_auc['avg'] = np.array(
@@ -141,6 +156,8 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
 
     pred_each_class_ind = {i:np.where(y_pred==i)[0] for i in labels}
     acc_per_class_dict = {}
+
+
     for i,j in pred_each_class_ind.items():
         if j.shape[0] == 0:
             acc_per_class_dict[str(i)]=0
@@ -149,11 +166,6 @@ def report_performance(y_true, y_pred, y_score, labels, verbose=None,
             y_pred_mask = y_pred[j]
             acc_per_class_dict[str(i)] = [np.equal(y_true_mask,y_pred_mask).sum(0)/y_pred_mask.shape[0]]
 
-    # acc_per_class_dict = {}
-    # for i in range(labels.shape[0]):
-    #     ans  = report_df.iloc[i]['support']/report_support_pred_class.iloc[i]['predicted']
-    #     ans = 0 if np.isnan(ans) else ans
-    #     acc_per_class_dict.setdefault(str(i), [ans])
     acc_per_class_df = pd.DataFrame.from_dict(acc_per_class_dict).transpose()
     acc_per_class_df.columns = ['ACC']
 
@@ -203,7 +215,9 @@ def combine_report_and_auc(report_df, report_support_pred_class,
     report_acc_per_class_mask_with_nan_df = pd.DataFrame(acc_per_class_na_np,
                                                               index=report_df.index,
                                                               columns=acc_per_class_df.columns)
+    #  report_df.loc['acc/total']['precision'] return accuracy value => total_accuracy has only 1 column, and I just put it at precision columns
     report_acc_per_class_mask_with_nan_df.loc[:acc_per_class_df.shape[0],:] = acc_per_class_df.values
+    report_acc_per_class_mask_with_nan_df.loc['acc/total']['ACC'] = report_df.loc['acc/total']['precision']
 
 
     ## create maks for roc_auc_df to have same index as report_df.index (fill with nan)

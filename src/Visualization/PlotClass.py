@@ -46,7 +46,6 @@ class PlotClass:
         assert isinstance(name_and_tuple_dict, dict), ''
         assert isinstance(save_path , str), ''
 
-
         self.set_subplots(subplot_size)
         if title is not None:
             assert isinstance(title, str), ''

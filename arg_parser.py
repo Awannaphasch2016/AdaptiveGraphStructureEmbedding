@@ -23,7 +23,7 @@ parser.add_argument('--log', action='store_true', help="")
 parser.add_argument('--use_gdc', action='store_true',
                     help='Use GDC preprocessing.')
 #--------setup
-parser.add_argument('--dataset', type=str, default='cora', help='')
+parser.add_argument('--dataset', type=str, default=None, help='')
 parser.add_argument('--k_fold_split', '-kf',type=str, default=3, help='')
 parser.add_argument('--downsample','-ds', action='store_true', help="")
 
@@ -48,29 +48,48 @@ parser.add_argument('--save_file', '-sf', action='store_true', help="")
 parser.add_argument('--save_plot', '-sp', action='store_true', help="")
 parser.add_argument('--save_cv_file', '-scf', action='store_true', help="")
 parser.add_argument('--save_cv_plot', '-scp', action='store_true', help="")
+parser.add_argument('--plot_and_save_all_cv', '-pasac', action='store_true', help="")
 
+#--------manual or not
+parser.add_argument('--manual', action='store_true', help="")
 #-- utilities
 
 
 args = parser.parse_args()
 #--------check for args conflict
-assert sum([args.run_gcn_gan, args.run_gcn_only]) == 1 , "only of of the following can be true at the same time \n" \
-                                                   "1. args.run_gcn_gan, 2. args.run_gcn_only"
-assert args.preserved_edges_percent <= 1, ''
 
-if args.run_gcn_only:
-    assert args.num_gan_epoch is None, ""
-    if args.main_epoch  is None:
-        args.main_epoch = 100
-    if args.preserved_edges_percent is None:
-        args.preserved_edges_percent = 1
+if args.plot_and_save_all_cv:
+    # args.plot_cv_roc = True
+    args.save_cv_file = True
+    args.save_cv_plot = True
+    args.save_emb = True
+
+if args.manual:
+    assert not args.run_gcn_only, ''
+    assert not args.run_gcn_gan, ''
+    assert args.num_gan_epoch is None, ''
+    assert args.main_epoch is None, ''
+    assert args.preserved_edges_percent is None, ''
+    assert args.dataset is None, ''
+else:
+    assert args.dataset in ['cora','citeseer'], ''
+    assert sum([args.run_gcn_gan,
+                args.run_gcn_only]) == 1, "only of of the following can be true at the same time \n" \
+                                          "1. args.run_gcn_gan, 2. args.run_gcn_only"
+    assert args.preserved_edges_percent <= 1, ''
+    if args.run_gcn_only:
+        assert args.num_gan_epoch is None, ""
+        if args.main_epoch  is None:
+            args.main_epoch = 100
+        if args.preserved_edges_percent is None:
+            args.preserved_edges_percent = 1
 
 
-if args.run_gcn_gan:
-    assert args.num_gan_epoch is not None, ""
-    if args.main_epoch  is None:
-        args.main_epoch = 100
-    if args.num_gan_epoch is None:
-        args.num_gan_epoch = 1
-    if args.preserved_edges_percent is None:
-        args.preserved_edges_percent = 1
+    if args.run_gcn_gan:
+        assert args.num_gan_epoch is not None, ""
+        if args.main_epoch  is None:
+            args.main_epoch = 100
+        if args.num_gan_epoch is None:
+            args.num_gan_epoch = 1
+        if args.preserved_edges_percent is None:
+            args.preserved_edges_percent = 1

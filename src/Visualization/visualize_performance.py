@@ -27,6 +27,7 @@ def visualize_roc_curve(fpr, tpr, roc_auc, save_path=None, file_name=None, save_
     plt.ylabel('True Positive Rate')
     plt.title(f'{file_name}')
     plt.legend(loc="lower right")  # todo show legen of all class_roc_curve
-    if save_status is not None:
+    if save_status:
+        print(f'saving roc to {save_file}..')
         plt.savefig(save_file)
     plt.show()
