@@ -2,8 +2,10 @@ import numpy as np
 import torch
 
 class ModelInputData():
-    def __init__(self, dir, dataset, is_downsampled=True):
+    def __init__(self, dir, dataset, is_downsampled=True, device=None):
+        assert device is not None, "device must be specified to avoid ambiguity"
 
+        self.device = device
         self.downsample = is_downsampled
         self.dir = dir
         if dataset == 'cora':
@@ -40,7 +42,7 @@ class ModelInputData():
     def preparing_cora_for_new_purposed_model(self):
 
         data, _ = torch.load(
-            f'{self.dir}\\..\\Notebook\\Examples\\data\\Cora\\Cora\\processed\\data.pt')
+            f'{self.dir}/../Notebook/Examples/data/Cora/Cora/processed/data.pt')
         # data, _ = torch.load(
         #     r'C:\Users\Anak\PycharmProjects\AdaptiveGraphStructureEmbedding\Notebook\Examples\data\Cora\Cora\processed\data.pt')
         data.y_before_relabel = np.array(data.y)
@@ -91,7 +93,7 @@ class ModelInputData():
                                                     np.where(
                                                         np.logical_not(selected_data_ind_bool)== 1))
 
-        self.data.y = self.data.y.type(torch.long)
+        self.data.y = self.data.y.type(torch.long).to(self.device)
 
 
     def cora_prepare_ind_for_trainning_and_test_set(self):
@@ -140,6 +142,8 @@ class ModelInputData():
         self.test_selected_maj_ind = np.intersect1d(np.where(self.data.y == 1),
                                                np.where(
                                                    np.logical_not(selected_data_ind_bool)== 1))
+
+        self.data.y = self.data.y.to(self.device)
 
 
     def set_data(self,fake_data=None):

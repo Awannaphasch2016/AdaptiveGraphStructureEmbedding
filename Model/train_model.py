@@ -52,7 +52,7 @@ class MyNewModel:
         #==class specific parameter
         #=====================
         self.cur_dir = os.getcwd()
-        self.save_path = f'{self.cur_dir}\\..\\Output\\Report\\{self.dataset_dict["dataset"]}\\{self.model_parameters_dict["model_name"]}\\'
+        self.save_path = f'{self.cur_dir}/../Output/Report/{self.dataset_dict["dataset"]}/{self.model_parameters_dict["model_name"]}/'
 
         #=====================
         #==call Plotting class

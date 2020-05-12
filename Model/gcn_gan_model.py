@@ -39,7 +39,8 @@ class GCNGAN(MyNewModel):
         # ==class specific parameter
         # =====================
         self.cur_dir = os.getcwd()
-        self.save_path = f'{self.cur_dir}\\..\\Output\\Report\\{self.dataset_dict["dataset"]}\\{self.model_parameters_dict["model_name"]}\\'
+        # self.save_path = f'{self.cur_dir}\\..\\Output\\Report\\{self.dataset_dict["dataset"]}\\{self.model_parameters_dict["model_name"]}\\'
+        self.save_path = f'{self.cur_dir}/../Output/Report/{self.dataset_dict["dataset"]}/{self.model_parameters_dict["model_name"]}/'
 
         # =====================
         # ==call Plotting class
@@ -108,8 +109,8 @@ class GCNGAN(MyNewModel):
         # =====================
         self.model_input_data = ModelInputData(self.cur_dir,
                                                self.dataset_dict['dataset'],
-                                               is_downsampled=self.dataset_dict[
-                                                   'is_downsampled'])
+                                               is_downsampled=self.dataset_dict['is_downsampled'],
+                                               device=self.model_parameters_dict['device'])
         # self.data = self.model_input_data.data
 
         self.init_model()
@@ -588,7 +589,7 @@ class GCNGAN(MyNewModel):
             self.performance_per_epoch['y_true_per_epoch']['trainning_select_minfake_minreal_majreal_ind'],
             self.performance_per_epoch['y_pred_per_epoch']['trainning_select_minfake_minreal_majreal_ind'],
             self.performance_per_epoch['y_score_per_epoch']['trainning_select_minfake_minreal_majreal_ind'],
-            labels=np.unique(self.model_input_data.data.y),
+            labels=np.unique(self.model_input_data.data.y.cpu().detach().numpy()),
             return_value_for_cv=return_report_stat_for_cv,
             save_path=save_path,
             file_name=report_train_file,
@@ -598,7 +599,7 @@ class GCNGAN(MyNewModel):
             self.performance_per_epoch['y_true_per_epoch']['test_select_minreal_majreal_ind'],
             self.performance_per_epoch['y_pred_per_epoch']['test_select_minreal_majreal_ind'],
             self.performance_per_epoch['y_score_per_epoch']['test_select_minreal_majreal_ind'],
-            labels=np.unique(self.model_input_data.data.y),
+            labels=np.unique(self.model_input_data.data.y.cpu().detach().numpy()),
             save_path=save_path,
             file_name=report_test_file,
             return_value_for_cv=return_report_stat_for_cv)
@@ -616,7 +617,7 @@ class GCNGAN(MyNewModel):
         skf = StratifiedKFold(n_splits=self.model_parameters_dict['k_fold_split'])
 
         self.gcn.randomedge_sampler()
-        original_y = self.model_input_data.data.y
+        original_y = self.model_input_data.data.y.cpu().detach().numpy()
         for train, test in skf.split(
                 np.arange(self.model_input_data.data.x.shape[0]),
                 original_y):
@@ -662,8 +663,7 @@ class GCNGAN(MyNewModel):
         minreal_minfake_majreal_y = torch.cat(
             (self.model_input_data.data.y,
              torch.zeros(
-                 fake_data.size(0)).type(
-                 torch.long)), 0).type(
+                 fake_data.size(0)).type(torch.long).to(self.model_parameters_dict['device'])), 0).type(
             torch.long).to(self.model_parameters_dict['device'])
 
         #=====================
@@ -891,5 +891,5 @@ if __name__ == '__main__':
     #                           boolean_dict.copy())
     gcn_gan = GCNGAN(dataset_dict, model_parameters_dict, boolean_dict)
 
-    avg_auc, avg_acc = gcn_gan.run_model()
+    model_performance_summary = gcn_gan.run_model()
 
