@@ -1,3 +1,4 @@
+import pandas as pd
 import os
 import time
 
@@ -115,8 +116,11 @@ class GCNGAN(MyNewModel):
         self.total_accs_dict = {}
         self.total_aucs_dict = {}
         self.total_loss = {}
-        # self.train_loss = None
-        # self.test_loss = None
+        #=====================
+        #== multi index for experiemtns
+        #=====================
+        self.create_multi_level_row_index()
+        self.create_multi_level_col_index()
 
     def check_input_requirement(self, dataset_dict, model_parameters_dict,
                                 boolean_dict):
@@ -276,9 +280,39 @@ class GCNGAN(MyNewModel):
         test_report, test_cm = self.plot_scan_and_loss(
             return_report_stat_for_cv=True)
 
-        avg_auc, avg_acc = test_report.loc['acc/total']['AUC'], \
-                           test_report.loc['acc/total']['ACC']
-        return avg_auc, avg_acc
+        # TODO create model_performance_summary
+        # avg_auc, avg_acc = test_report.loc['acc/total']['AUC'], \
+        #                    test_report.loc['acc/total']['ACC']
+
+        performance_summary_val = [[  # class 0
+            test_report.loc['0']['precision'],
+            test_report.loc['0']['recall'],
+            test_report.loc['0']['f1-score'],
+            test_report.loc['0']['support'],
+            test_report.loc['0']['predicted'],
+            test_report.loc['0']['AUC'],
+            test_report.loc['0']['AUC'],
+            # class 1
+            test_report.loc['1']['precision'],
+            test_report.loc['1']['recall'],
+            test_report.loc['1']['f1-score'],
+            test_report.loc['1']['support'],
+            test_report.loc['1']['predicted'],
+            test_report.loc['1']['AUC'],
+            test_report.loc['1']['AUC'],
+
+            test_report.loc['acc/total']['ACC'],
+            test_report.loc['acc/total']['AUC'],
+
+        ]]
+
+
+        model_performance_summary = pd.DataFrame(performance_summary_val,
+                                                 index=self.tuple_row_index,
+                                                 columns=self.tuple_col_index)
+
+        # return avg_auc, avg_acc
+        return model_performance_summary
 
     def run_gan_model(self):
 
@@ -293,10 +327,11 @@ class GCNGAN(MyNewModel):
                     gan_model.noise(self.number_of_sample_per_batch).to(
                         self.model_parameters_dict['device']))  # 10, 1433
 
-                d_error, d_pred_real, d_pred_fake = \
+                error_real, error_fake, d_pred_real, d_pred_fake = \
                     self.gan.train_discriminator(self.gan.d_optimizer,
                                                  real_data,
                                                  fake_data)
+                d_error = error_real + error_fake
 
                 fake_data = self.gan.generator(gan_model.noise(
                     self.number_of_sample_per_batch).to(
@@ -307,8 +342,11 @@ class GCNGAN(MyNewModel):
                                                        self.model_parameters_dict[
                                                            'device']))
 
-                dict_for_plot = {'discriminator_loss': d_error,
+
+                dict_for_plot = {'discriminator_total_loss': d_error,
                                  'generator_loss': g_error,
+                                 'discriminator_real_loss': error_real,
+                                 'discriminator_fake_loss': error_fake
                                  }
                 self.plot_gan_performance.collect_hist_using_list_of_name(
                     dict_for_plot=dict_for_plot)
@@ -498,9 +536,10 @@ class GCNGAN(MyNewModel):
         print(report_train_file)
         print(report_test_file)
 
-
-        list_of_name = {'discriminator_loss': (0, 0),
+        list_of_name = {'discriminator_total_loss': (0, 0),
                         'generator_loss': (0, 0),
+                        'discriminator_real_loss': (0, 0),
+                        'discriminator_fake_loss': (0, 0),
                         }
         self.plot_gan_performance.plot_using_list_of_name(subplot_size=(1, 1),
                                                          name_and_tuple_dict=list_of_name,
@@ -724,6 +763,42 @@ class GCNGAN(MyNewModel):
     def display_gan_performance_per_main_epoch(self, d_error, g_error):
         print(f"""discriminator_loss: {d_error}, generator_loss: {g_error}""")
 
+    def create_multi_level_row_index(self):
+
+        tuple_row_index = [(self.dataset_dict['dataset'],
+                            self.model_parameters_dict['model_name'],
+                            f"percent={self.model_parameters_dict['preserved_edges_percent']}",
+                            f"main_epoch={self.model_parameters_dict['main_epoch']}",
+                            f"gan_epoch={self.model_parameters_dict['gan_epoch']}",
+                            )]
+
+        self.tuple_row_index = pd.MultiIndex.from_tuples(tuple_row_index)
+
+    def create_multi_level_col_index(self):
+
+        tuple_col_index = (
+            # 16 columsn
+            ('class0', 'precision'),
+            ('class0', 'recall'),
+            ('class0', 'f1'),
+            ('class0', 'support'),
+            ('class0', 'predicted'),
+            ('class0', 'Acc'),
+            ('class0', 'AUC'),
+
+            ('class1', 'precision'),
+            ('class1', 'recall'),
+            ('class1', 'f1'),
+            ('class1', 'support'),
+            ('class1', 'predicted'),
+            ('class1', 'Acc'),
+            ('class1', 'AUC'),
+
+            ('total', 'total_accs'),
+            ('total', 'total_aucs'),
+        )
+
+        self.tuple_col_index = pd.MultiIndex.from_tuples(tuple_col_index)
 
 
 if __name__ == '__main__':

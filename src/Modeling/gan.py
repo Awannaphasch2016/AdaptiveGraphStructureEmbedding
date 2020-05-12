@@ -240,7 +240,7 @@ class GAN:
         self.d2_loss_hist.append(error_fake.tolist())
 
         # Return error and predictions for real and fake inputs
-        return error_real + error_fake, prediction_real, prediction_fake
+        return error_real, error_fake, prediction_real, prediction_fake
 
     def init_gan(self):
         if args.log:

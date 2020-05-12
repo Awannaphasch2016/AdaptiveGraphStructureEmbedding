@@ -77,12 +77,12 @@ parser.add_argument('--is_displayed_cv_performance_table', action='store_true', 
 # parser.add_argument('--is_save_plot', '-sp', action='store_true', help="")
 # parser.add_argument('--is_save_cv_file', '-scf', action='store_true', help="")
 # parser.add_argument('--is_save_cv_plot', '-scp', action='store_true', help="")
-# parser.add_argument('--is_save_experiment', '-sext', action='store_true', help="")
 
 #--------manual or not
 parser.add_argument('--manual', action='store_true', help="")
 parser.add_argument('--is_plotted_and_saved_all_cv', '-pasac', action='store_true', help="")
 parser.add_argument('--is_plotted_and_saved_each', '-pase', action='store_true', help="")
+parser.add_argument('--is_saved_experiment', '-sex', action='store_true', help="")
 #-- utilities
 
 

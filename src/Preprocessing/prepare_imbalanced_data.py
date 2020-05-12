@@ -12,7 +12,6 @@ class ModelInputData():
         elif dataset == 'citeseer':
             self.data = self.preparing_citeseer_for_new_purposed_model()
             self.citeseer_prepare_ind_for_trainning_and_test_set()
-        print()
 
     def relabel_minority_and_majority_classes(self,data):
 

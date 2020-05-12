@@ -141,3 +141,6 @@ class MyNewModel:
 
         return file_name
 
+    def create_multi_level_row_index(self):
+        pass
+

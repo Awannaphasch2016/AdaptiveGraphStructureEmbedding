@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import time
 
 import numpy as np
@@ -19,9 +20,9 @@ from src.Preprocessing import ModelInputData
 from src.Visualization import PlotEmb
 from src.Preprocessing.prepare_emb import apply_tsne_on_emb
 
-class GCN(MyNewModel):
+class BenchMark(MyNewModel):
     def __init__(self, dataset_dict, model_parameters_dict, boolean_dict):
-        super(GCN, self).__init__(model_parameters_dict['run_gcn'])
+        super(BenchMark, self).__init__(model_parameters_dict['run_gcn'])
 
         self.performance_per_epoch = {}
         self.check_input_requirement( dataset_dict, model_parameters_dict, boolean_dict)
@@ -88,6 +89,9 @@ class GCN(MyNewModel):
         self.total_accs_dict = {}
         self.total_aucs_dict = {}
         self.total_loss = {}
+
+        self.create_multi_level_row_index()
+        self.create_multi_level_col_index()
 
     def check_input_requirement(self, dataset_dict, model_parameters_dict,
                                 boolean_dict):
@@ -217,9 +221,38 @@ class GCN(MyNewModel):
         test_report, test_cm = self.plot_scan_and_loss(
             return_report_stat_for_cv=True)
 
-        avg_auc, avg_acc = test_report.loc['acc/total']['AUC'], \
-                           test_report.loc['acc/total']['ACC']
-        return avg_auc, avg_acc
+        # TODO create model_performance_summary
+        # avg_auc, avg_acc = test_report.loc['acc/total']['AUC'], \
+        #                    test_report.loc['acc/total']['ACC']
+
+        performance_summary_val = [[  # class 0
+            test_report.loc['0']['precision'],
+            test_report.loc['0']['recall'],
+            test_report.loc['0']['f1-score'],
+            test_report.loc['0']['support'],
+            test_report.loc['0']['predicted'],
+            test_report.loc['0']['AUC'],
+            test_report.loc['0']['AUC'],
+            # class 1
+            test_report.loc['1']['precision'],
+            test_report.loc['1']['recall'],
+            test_report.loc['1']['f1-score'],
+            test_report.loc['1']['support'],
+            test_report.loc['1']['predicted'],
+            test_report.loc['1']['AUC'],
+            test_report.loc['1']['AUC'],
+
+            test_report.loc['acc/total']['ACC'],
+            test_report.loc['acc/total']['AUC'],
+
+        ]]
+
+
+        model_performance_summary = pd.DataFrame(performance_summary_val,
+                                                 index=self.tuple_row_index,
+                                                 columns=self.tuple_col_index)
+
+        return model_performance_summary
 
     def get_result_per_epoch(self, logits, y_true):
 
@@ -508,6 +541,44 @@ class GCN(MyNewModel):
         self.performance_per_epoch.setdefault('aucs_per_epoch', {}).update(
             aucs_per_epoch)
 
+    def create_multi_level_row_index(self):
+
+        tuple_row_index = [(self.dataset_dict['dataset'],
+                                self.model_parameters_dict['model_name'],
+                                f"percent={self.model_parameters_dict['preserved_edges_percent']}",
+                                f"main_epoch={self.model_parameters_dict['main_epoch']}",
+                                f"gan_epoch=0",
+                                )]
+
+
+        self.tuple_row_index = pd.MultiIndex.from_tuples(tuple_row_index)
+
+    def create_multi_level_col_index(self):
+
+        tuple_col_index = (
+            # 16 columsn
+            ('class0', 'precision'),
+            ('class0', 'recall'),
+            ('class0', 'f1'),
+            ('class0', 'support'),
+            ('class0', 'predicted'),
+            ('class0', 'Acc'),
+            ('class0', 'AUC'),
+
+            ('class1', 'precision'),
+            ('class1', 'recall'),
+            ('class1', 'f1'),
+            ('class1', 'support'),
+            ('class1', 'predicted'),
+            ('class1', 'Acc'),
+            ('class1', 'AUC'),
+
+            ('total', 'total_accs'),
+            ('total', 'total_aucs'),
+        )
+
+        self.tuple_col_index = pd.MultiIndex.from_tuples(tuple_col_index)
+
 
 if __name__ == '__main__':
 
@@ -559,11 +630,11 @@ if __name__ == '__main__':
     #==cv
     #=====================
 
-    args.is_plotted_cv_roc= True
-    args.is_plotted_cv_emb= True
-    args.is_plotted_cv_performance= True
-    args.is_displayed_cv_performance_table= True
-    args.is_downsampled = True
+    # args.is_plotted_cv_roc= True
+    # args.is_plotted_cv_emb= True
+    # args.is_plotted_cv_performance= True
+    # args.is_displayed_cv_performance_table= True
+    # args.is_downsampled = True
 
     # args.is_saved_cv_roc_plot= True
     # args.is_saved_cv_emb_plot= True
@@ -595,7 +666,7 @@ if __name__ == '__main__':
 
     # my_new_model = MyNewModel(dataset_dict.copy(), model_parameters_dict.copy(),
     #                           boolean_dict.copy())
-    gcn_gan = GCN(dataset_dict, model_parameters_dict, boolean_dict)
+    gcn_gan = BenchMark(dataset_dict, model_parameters_dict, boolean_dict)
 
     avg_auc, avg_acc = gcn_gan.run_model()
 
