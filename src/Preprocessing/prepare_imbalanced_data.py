@@ -2,9 +2,9 @@ import numpy as np
 import torch
 
 class ModelInputData():
-    def __init__(self, dir ,dataset, downsample=True):
+    def __init__(self, dir, dataset, is_downsampled=True):
 
-        self.downsample = downsample
+        self.downsample = is_downsampled
         self.dir = dir
         if dataset == 'cora':
             self.data = self.preparing_cora_for_new_purposed_model()
@@ -12,6 +12,7 @@ class ModelInputData():
         elif dataset == 'citeseer':
             self.data = self.preparing_citeseer_for_new_purposed_model()
             self.citeseer_prepare_ind_for_trainning_and_test_set()
+        print()
 
     def relabel_minority_and_majority_classes(self,data):
 
@@ -90,8 +91,8 @@ class ModelInputData():
         self.test_selected_maj_ind = np.intersect1d(np.where(self.data.y == 1),
                                                     np.where(
                                                         np.logical_not(selected_data_ind_bool)== 1))
-        self.data.y = self.data.y.numpy()
 
+        self.data.y = self.data.y.type(torch.long)
 
 
     def cora_prepare_ind_for_trainning_and_test_set(self):

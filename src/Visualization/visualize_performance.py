@@ -1,6 +1,11 @@
 import matplotlib.pyplot as plt
 
-def visualize_roc_curve(fpr, tpr, roc_auc, save_path=None, file_name=None, save_status=None):
+def visualize_roc_curve(fpr,
+                        tpr,
+                        roc_auc,
+                        save_path=None,
+                        file_name=None,
+                        save_status=None):
     """
     refer back to the following link : https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html#sphx-glr-auto-examples-model-selection-plot-roc-py
     @param fpr: type = dict

@@ -1,7 +1,19 @@
 import torch
 import numpy as np
+from torch.utils.data import Dataset
 
 
+class CoraTorchDataset(Dataset):
+
+    def __init__(self, data, y):
+        self.data = data
+        self.y = y
+
+    def __len__(self):
+        return self.data.size(0)
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.y[idx]
 
 def relabel_minority_and_majority_classes(data, isLog=False):
 

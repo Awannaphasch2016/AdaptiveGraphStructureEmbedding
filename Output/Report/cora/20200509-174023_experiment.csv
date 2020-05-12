@@ -1,0 +1,11 @@
+,avg_auc,avg_acc
+(train_model_epoch=100_gan_epoch=1_edge_percent=1),0.6457492138059557,0.94
+(run_gcn_epoch=100_gan_epoch=1_edge_percent=1),0.6672992346767301,0.93
+(train_model_epoch=100_gan_epoch=5_edge_percent=1),0.6885283088417725,0.94
+(run_gcn_epoch=100_gan_epoch=5_edge_percent=1),0.8224633109445976,0.95
+(train_model_epoch=100_gan_epoch=10_edge_percent=1),0.7710356756862258,0.95
+(run_gcn_epoch=100_gan_epoch=10_edge_percent=1),0.7486508416635459,0.94
+(train_model_epoch=100_gan_epoch=25_edge_percent=1),0.7052807510830608,0.94
+(run_gcn_epoch=100_gan_epoch=25_edge_percent=1),0.7305477637147184,0.95
+(train_model_epoch=100_gan_epoch=50_edge_percent=1),0.6742916840785624,0.94
+(run_gcn_epoch=100_gan_epoch=50_edge_percent=1),0.8881028307903645,0.96

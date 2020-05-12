@@ -1,4 +1,4 @@
 from .visualization import *
-from .PlotClass import *
-from .PlotEmb import *
+from .plot_performance import *
+from .plot_emb import *
 from .visualize_performance import *
