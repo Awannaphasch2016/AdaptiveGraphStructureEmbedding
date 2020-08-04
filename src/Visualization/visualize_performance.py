@@ -16,7 +16,7 @@ def visualize_roc_curve(fpr,
     save_file = None
     if save_path is not None and isinstance(save_path, str):
         assert isinstance(file_name, str), "file_name must be specified to avoid ambiguity"
-        save_file = save_path + f'roc_{file_name}.png'
+        save_file = save_path + f'{file_name}_roc.png'
 
     plt.figure()
     lw = 2

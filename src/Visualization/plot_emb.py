@@ -35,22 +35,22 @@ class PlotEmb():
 
 
 
-def plot_emb(x, y, title=None):
-    assert isinstance(x, dict), ''
-    assert isinstance(y, dict), ''
-    assert isinstance(title, str), ' '
-    plt.scatter(x['train'],y['train'], label='train')
-    plt.scatter(x['test'],y['test'], label='test')
-
-    plt.scatter(x['maj'],y['maj'], label='minority', marker="^")
-    plt.scatter(x['min'],y['min'], label='test', marker="^")
-
-    plt.title(title)
-    plt.show()
-
-    # axs[0].scatter(X[y == 0, 0], X[y == 0, 1], label="Class #0", alpha=0.5)
-    # axs[0].scatter(X[y == 1, 0], X[y == 1, 1], label="Class #1", alpha=0.5)
-    # axs[0].set_title('Original set')
-    # plot_decoration(axs[0])
-    #
-    #
+# def plot_emb(x, y, title=None):
+#     assert isinstance(x, dict), ''
+#     assert isinstance(y, dict), ''
+#     assert isinstance(title, str), ' '
+#     plt.scatter(x['train'],y['train'], label='train')
+#     plt.scatter(x['test'],y['test'], label='test')
+#
+#     plt.scatter(x['maj'],y['maj'], label='minority', marker="^")
+#     plt.scatter(x['min'],y['min'], label='test', marker="^")
+#
+#     plt.title(title)
+#     plt.show()
+#
+#     # axs[0].scatter(X[y == 0, 0], X[y == 0, 1], label="Class #0", alpha=0.5)
+#     # axs[0].scatter(X[y == 1, 0], X[y == 1, 1], label="Class #1", alpha=0.5)
+#     # axs[0].set_title('Original set')
+#     # plot_decoration(axs[0])
+#     #
+#     #

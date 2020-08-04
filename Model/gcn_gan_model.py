@@ -40,7 +40,8 @@ class GCNGAN(MyNewModel):
         # =====================
         self.cur_dir = os.getcwd()
         # self.save_path = f'{self.cur_dir}\\..\\Output\\Report\\{self.dataset_dict["dataset"]}\\{self.model_parameters_dict["model_name"]}\\'
-        self.save_path = f'{self.cur_dir}/../Output/Report/{self.dataset_dict["dataset"]}/{self.model_parameters_dict["model_name"]}/'
+        self.save_path = f'{self.cur_dir}/../Output/Report/{self.dataset_dict["dataset"]}/{self.model_parameters_dict["model_name"]}/{self.model_parameters_dict["time_stamp"]}/'
+        os.makedirs(self.save_path, exist_ok=True)
 
         # =====================
         # ==call Plotting class
@@ -547,6 +548,7 @@ class GCNGAN(MyNewModel):
                                                          save_file_name=gan_performance_file_name,
                                                          title=title,
                                                          save_path=save_path)
+
 
         if self.boolean_dict['plot_dict']['is_plotted_cv_emb'] is not None:
             emb_dict = self.get_emb2d()

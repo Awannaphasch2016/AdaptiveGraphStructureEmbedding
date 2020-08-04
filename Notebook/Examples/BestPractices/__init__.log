@@ -1,0 +1,73 @@
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001FECB30A940>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001FECB30A940>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001FECB30A8D0>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001FECB30A8D0>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001A01A30AA20>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001A01A30AA20>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A0E95B38>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A0E95B38>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A0E95B38>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A0DE0BA8>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A0DE0BA8>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A0BC60B8>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A0BC60B8>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A1F32860>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x00000213A1F32860>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000002108D3D9630>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000002108D3D9630>,), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001F3F4E185F8>, array([[ 0.,  0.,  5., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 10.,  0.,  0.],
+       [ 0.,  0.,  0., ..., 16.,  9.,  0.],
+       ...,
+       [ 0.,  0.,  1., ...,  6.,  0.,  0.],
+       [ 0.,  0.,  2., ..., 12.,  0.,  0.],
+       [ 0.,  0., 10., ..., 12.,  1.,  0.]]), array([0, 1, 2, ..., 8, 9, 8]), array([], shape=(0, 64), dtype=float64), array([], dtype=int32)), and kwargs: {}
+INFO:root:Ran with args: (<__main__.TheAlgorithm object at 0x000001F3F4E185F8>,), and kwargs: {}

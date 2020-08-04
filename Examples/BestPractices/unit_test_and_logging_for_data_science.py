@@ -10,12 +10,12 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import MinMaxScaler
 
-from functools import wraps
 
-def my_logger(orig_func):
+def signature_logger(orig_func):
     import logging
     # TODO what does basicConfig do?
     logging.basicConfig(filename='{}.log'.format(orig_func.__name__), level=logging.INFO)
+    from functools import wraps
 
     @wraps(orig_func)
     def wrapper(*args, **kwargs):
@@ -28,6 +28,7 @@ def my_logger(orig_func):
 
 def my_timer(orig_func):
     import time
+    from functools import wraps
 
     @wraps(orig_func)
     def wrapper(*args, **kwargs):

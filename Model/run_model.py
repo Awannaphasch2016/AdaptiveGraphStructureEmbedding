@@ -32,17 +32,17 @@ if __name__ == '__main__':
     # dataset_list = ['cora']
 
     main_epoch = [100]
-    gan_epoch = [1, 5, 10, 25, 50]
+    gan_epoch = [50, 25, 10, 5, 1]
     preserved_edges_percent = [1.0, 0.75, 0.5, 0.25]
-    model_name_list = ['run_gcn', 'train_mode']
-    dataset_list = ['cora', 'citeseer']
+    model_name_list = [ 'train_model', 'run_gcn']
+    dataset_list = [ 'citeseer', 'cora']
 
     time_stamp = time.strftime("%Y%m%d-%H%M%S")
 
     epoch_pair = list(
         itertools.product(main_epoch, gan_epoch, preserved_edges_percent,
                           model_name_list, dataset_list))
-
+    epoch_pair = epoch_pair[3:]
     model_perameters_dict = {}
     experiment_df = None
 
